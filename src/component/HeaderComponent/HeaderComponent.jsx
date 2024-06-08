@@ -8,8 +8,8 @@ const HeaderComponent = () => {
   return (
     <div>
       <WrapperHeader gutter={30}>
-        <Col span={6}>Logo</Col>
-        <Col span={12}>
+        <Col span={5}>Logo</Col>
+        <Col span={13}>
           <ButtonInputSearch
             placeholder="Tìm kiếm... "
             textButton="Search"
@@ -17,7 +17,7 @@ const HeaderComponent = () => {
             
           />
         </Col>
-        <Col span={6} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <Col span={6} style={{ display: 'flex', alignItems: 'center', gap: '54px' }}>
           <WrapperHeaderAccount>
             <Button
               style={{

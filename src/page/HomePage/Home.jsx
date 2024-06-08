@@ -21,7 +21,7 @@ const Home = () => {
 
   return (
     <>
-    <div style={{ padding: "0 120px" }}>
+    <div style={{width: '1270px', margin: '0 auto' }}>
       <WapperTypeProduct>
         {arr.map((item) => (
           <TypeProduct name={item} key={item} />

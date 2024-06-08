@@ -19,7 +19,8 @@ const CardComponent = () => {
       <StyleNameProduct>Conan</StyleNameProduct>
       <div style={{display:"flex",alignItems:"center"}}>
       <WapperPriceText>
-        69.300 đ <WapperDiscountText>-30%</WapperDiscountText>
+        <span style={{marginRight: '8px'}}>69.300 đ </span>
+      <WapperDiscountText>-30%</WapperDiscountText>
         
       </WapperPriceText>
       </div>

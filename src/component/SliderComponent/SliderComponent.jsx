@@ -1,6 +1,7 @@
 import { Image } from 'antd';
 import React from 'react';
 import Slider from 'react-slick';
+import { WapperSliderStyle } from './style';
 
 const SliderComponent = ({ arrImages }) => {
     const settings = {
@@ -10,7 +11,7 @@ const SliderComponent = ({ arrImages }) => {
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplay: true,
-        autoplaySpeed: 2000,
+        autoplaySpeed: 1500,
     };
   
     return (
