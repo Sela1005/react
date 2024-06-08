@@ -1,0 +1,10 @@
+{
+    "users":{
+        "id": 1,
+        "userName": "admin",
+        "password": "123",
+        "role": "admin",
+        "status": true,
+        "email": "abc@gmail.com"
+    }
+}
