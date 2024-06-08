@@ -7,7 +7,7 @@ const ButtonInputSearch = (props) => {
   const { size, placeholder, textButton } = props;
 
   return (
-    <Input.Group compact style={{ display: 'flex' }}>
+    <Input.Group compact style={{ display:'flex'}}>
       <Input size={size} placeholder={placeholder} style={{ flex: 1 }} />
       <ButtonComponent 
         style={{ backgroundColor: "rgb(14, 86, 150)", color: "#fff", border: "none" }} 
