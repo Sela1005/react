@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Space, Radio } from "antd";
+import React, { useEffect, useState } from "react";
+import { Space, Radio, Input } from "antd";
 import ButtonComponent from "../../component/ButtonComponent/ButtonComponent";
 import InputForm from "../../component/InputForm/InputForm";
 import {
@@ -13,9 +13,97 @@ import {
   WapperContentLogin,
   WapperContentRegister
 } from "./style";
+import { useMutation } from "@tanstack/react-query";
+import * as UserService from '../../services/UserService';
+import { useMutationHooks } from "../../hooks/useMutationHook";
+import Loading from "../../component/LoadingComponent/Loading";
+import * as message from "../../component/Messages/Message";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import {useDispatch} from "react-redux"
+import { updateUser } from "../../slices/userSlide";
 
 const SignInPage = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [position, setPosition] = useState("login");
+  const [emailLogin, setEmailLogin] = useState('');
+  const [passwordLogin, setPasswordLogin] = useState('');
+  const [emailRegister, setEmailRegister] = useState('');
+  const [passwordRegister, setPasswordRegister] = useState('');
+  const [confirmPasswordRegister, setConfirmPasswordRegister] = useState('');
+
+  const mutationLogin = useMutationHooks(data => UserService.loginUser(data));
+  const mutationRegister = useMutationHooks(data => UserService.registerUser(data));
+
+  const { data: loginData, isPending: isLoginPending, isSuccess: isLoginSuccess, isError: isLoginError } = mutationLogin
+  const { data: registerData, isPending: isRegisterPending, isSuccess: isRegisterSuccess, isError: isRegisterError } = mutationRegister
+
+  const handleOnchangeEmailLogin = (value) => {
+    setEmailLogin(value);
+  };
+  const handleOnchangePasswordLogin = (value) => {
+    setPasswordLogin(value);
+  };
+
+  const handleOnchangeEmailRegister = (value) => {
+    setEmailRegister(value);
+  };
+  const handleOnchangePasswordRegister = (value) => {
+    setPasswordRegister(value);
+  };
+  const handleOnchangeConfirmPasswordRegister = (value) => {
+    setConfirmPasswordRegister(value);
+  };
+
+  useEffect(() => {
+    if (isLoginSuccess) {
+      message.success("Đăng nhập thành công!")
+      navigate('/')
+      localStorage.setItem('access_token',loginData?.access_token)
+      if(loginData?.access_token){
+        const decoded = jwtDecode(loginData?.access_token)
+        console.log('decoded',decoded)
+        if(decoded?.id) {
+          handleGetDetailsUser(decoded?.id, loginData?.access_token)
+        }
+      }
+    }
+  }, [isLoginSuccess]);
+
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailsUser(id,token)
+    dispatch(updateUser({...res?.data,access_token: token}))
+    // console.log('res', res?.data)
+    // console.log('access_token',token )
+  }
+
+  useEffect(() => {
+    if (isRegisterSuccess) {
+      message.success("Đăng ký thành công!");
+      setPosition("login");
+    } else if (isRegisterError) {
+      message.error("Đăng ký thất bại!");
+    }
+  }, [isRegisterSuccess, isRegisterError]);
+
+  const handleSignUp = () => {
+    mutationRegister.mutate({
+      email: emailRegister,
+      password: passwordRegister,
+      confirmPassword: confirmPasswordRegister
+    });
+    console.log('sign-up', emailRegister, passwordRegister, confirmPasswordRegister);
+  };
+
+  const handleSignIn = () => {
+    mutationLogin.mutate({
+      email: emailLogin,
+      password: passwordLogin
+    });
+    console.log('sign-in', emailLogin, passwordLogin);
+  };
 
   return (
     <Container>
@@ -33,24 +121,29 @@ const SignInPage = () => {
             <WapperContentLogin>
               <div>
                 <InputWrapper>
-                  <p>Số điện thoại/Email</p>
-                  <InputForm placeholder='Nhập số điện thoại hoặc Email'/>
+                  <p>Nhập Email</p>
+                  <InputForm placeholder='Email' value={emailLogin} handleOnChange={handleOnchangeEmailLogin} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập mật khẩu' />
+                  <InputForm placeholder='Nhập mật khẩu' value={passwordLogin} handleOnChange={handleOnchangePasswordLogin} />
                 </InputWrapper>
+                {loginData?.status === 'ERR' && <span style={{ color: 'red' }}>{loginData?.message}</span>}
                 <ButtonWrapper>
-                  <ButtonComponent
-                    textButton="Đăng nhập"
-                    type="primary"
-                    style={{
-                      width: "150px",
-                      height: "34px",
-                      marginTop: "20px",
-                      background: "rgb(69, 136, 181)",
-                    }}
-                  />
+                  <Loading isPending={isLoginPending}>
+                    <ButtonComponent
+                      disabled={!emailLogin.length || !passwordLogin.length}
+                      onClick={handleSignIn}
+                      textButton="Đăng nhập"
+                      type="primary"
+                      style={{
+                        width: "150px",
+                        height: "34px",
+                        marginTop: "20px",
+                        background: "rgb(69, 136, 181)",
+                      }}
+                    />
+                  </Loading>
                 </ButtonWrapper>
                 <p>Quên mật khẩu?</p>
               </div>
@@ -61,28 +154,33 @@ const SignInPage = () => {
             <WapperContentRegister>
               <div>
                 <InputWrapper>
-                  <p>Số điện thoại</p>
-                  <InputForm placeholder='Nhập số điện thoại'/>
+                  <p>Nhập Email</p>
+                  <InputForm placeholder='Nhập Email' value={emailRegister} handleOnChange={handleOnchangeEmailRegister} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập nhập mật khẩu'/>
+                  <InputForm placeholder='Nhập mật khẩu' value={passwordRegister} handleOnChange={handleOnchangePasswordRegister} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Nhập lại mật khẩu</p>
-                  <InputForm placeholder='Nhập lại mật khẩu'/>
+                  <InputForm placeholder='Nhập lại mật khẩu' value={confirmPasswordRegister} handleOnChange={handleOnchangeConfirmPasswordRegister} />
                 </InputWrapper>
+                {registerData?.status === 'ERR' && <span style={{ color: 'red' }}>{registerData?.message}</span>}
                 <ButtonWrapper>
-                  <ButtonComponent
-                    textButton="Đăng nhập"
-                    type="primary"
-                    style={{
-                      width: "150px",
-                      height: "34px",
-                      marginTop: "20px",
-                      background: "rgb(69, 136, 181)",
-                    }}
-                  />
+                  <Loading isPending={isRegisterPending}>
+                    <ButtonComponent
+                      disabled={!emailRegister.length || !passwordRegister.length || !confirmPasswordRegister.length}
+                      onClick={handleSignUp}
+                      textButton="Đăng ký"
+                      type="primary"
+                      style={{
+                        width: "150px",
+                        height: "34px",
+                        marginTop: "20px",
+                        background: "rgb(69, 136, 181)",
+                      }}
+                    />
+                  </Loading>
                 </ButtonWrapper>
               </div>
             </WapperContentRegister>
