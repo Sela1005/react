@@ -122,11 +122,11 @@ const SignInPage = () => {
               <div>
                 <InputWrapper>
                   <p>Nhập Email</p>
-                  <InputForm placeholder='Email' value={emailLogin} handleOnChange={handleOnchangeEmailLogin} />
+                  <InputForm placeholder='Email' value={emailLogin} onChange={handleOnchangeEmailLogin} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập mật khẩu' value={passwordLogin} handleOnChange={handleOnchangePasswordLogin} />
+                  <InputForm placeholder='Nhập mật khẩu' value={passwordLogin} onChange={handleOnchangePasswordLogin} />
                 </InputWrapper>
                 {loginData?.status === 'ERR' && <span style={{ color: 'red' }}>{loginData?.message}</span>}
                 <ButtonWrapper>
@@ -155,15 +155,15 @@ const SignInPage = () => {
               <div>
                 <InputWrapper>
                   <p>Nhập Email</p>
-                  <InputForm placeholder='Nhập Email' value={emailRegister} handleOnChange={handleOnchangeEmailRegister} />
+                  <InputForm placeholder='Nhập Email' value={emailRegister} onChange={handleOnchangeEmailRegister} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập mật khẩu' value={passwordRegister} handleOnChange={handleOnchangePasswordRegister} />
+                  <InputForm placeholder='Nhập mật khẩu' value={passwordRegister} onChange={handleOnchangePasswordRegister} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Nhập lại mật khẩu</p>
-                  <InputForm placeholder='Nhập lại mật khẩu' value={confirmPasswordRegister} handleOnChange={handleOnchangeConfirmPasswordRegister} />
+                  <InputForm placeholder='Nhập lại mật khẩu' value={confirmPasswordRegister} onChange={handleOnchangeConfirmPasswordRegister} />
                 </InputWrapper>
                 {registerData?.status === 'ERR' && <span style={{ color: 'red' }}>{registerData?.message}</span>}
                 <ButtonWrapper>
