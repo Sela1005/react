@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Radio } from "antd";
+import { Input, Radio } from "antd";
 
 export const Container = styled.div`
   display: flex;
@@ -58,3 +58,4 @@ export const WapperContentLogin = styled.div`
 export const WapperContentRegister = styled.div`
   width: 100%;
 `;
+

@@ -11,9 +11,8 @@ import {
   ButtonWrapper,
   RadioButton,
   WapperContentLogin,
-  WapperContentRegister
+  WapperContentRegister,
 } from "./style";
-import { useMutation } from "@tanstack/react-query";
 import * as UserService from '../../services/UserService';
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import Loading from "../../component/LoadingComponent/Loading";
@@ -22,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {useDispatch} from "react-redux"
 import { updateUser } from "../../slices/userSlide";
+import InputFormPassword from "../../component/InputForm/InputFormPassword";
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ const SignInPage = () => {
     if (isLoginSuccess) {
       message.success("Đăng nhập thành công!")
       navigate('/')
-      localStorage.setItem('access_token',loginData?.access_token)
+      localStorage.setItem('access_token',JSON.stringify(loginData?.access_token))
       if(loginData?.access_token){
         const decoded = jwtDecode(loginData?.access_token)
         console.log('decoded',decoded)
@@ -126,7 +126,7 @@ const SignInPage = () => {
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập mật khẩu' value={passwordLogin} onChange={handleOnchangePasswordLogin} />
+                  <InputFormPassword placeholder='Nhập mật khẩu' value={passwordLogin} onChange={handleOnchangePasswordLogin} />
                 </InputWrapper>
                 {loginData?.status === 'ERR' && <span style={{ color: 'red' }}>{loginData?.message}</span>}
                 <ButtonWrapper>
@@ -159,7 +159,7 @@ const SignInPage = () => {
                 </InputWrapper>
                 <InputWrapper>
                   <p>Mật khẩu</p>
-                  <InputForm placeholder='Nhập mật khẩu' value={passwordRegister} onChange={handleOnchangePasswordRegister} />
+                  <InputFormPassword placeholder='Nhập mật khẩu' value={passwordRegister} onChange={handleOnchangePasswordRegister} />
                 </InputWrapper>
                 <InputWrapper>
                   <p>Nhập lại mật khẩu</p>

@@ -18,3 +18,10 @@ export const WrapperHeaderCart = styled.div`
   justify-content: center;
   
 `;
+export const WrapperContentPopup = styled.p`
+cursor: pointer;
+&:hover {
+      color: #4588b5;
+}
+  
+`;

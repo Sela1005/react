@@ -1,18 +1,40 @@
-import { Badge, Button, Col, Flex } from "antd";
-import React from "react";
-import { WrapperHeader, WrapperHeaderAccount, WrapperHeaderCart } from "./Style";
+import { Badge, Button, Col, Flex, Popover } from "antd";
+import React, { useState } from "react";
+import { WrapperContentPopup, WrapperHeader, WrapperHeaderAccount, WrapperHeaderCart } from "./Style";
 import { CaretDownOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
 import ButtonInputSearch from "../ButtonInputSearch/ButtonInputSearch";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import * as UserService from '../../services/UserService';
+import { resetUser } from "../../slices/userSlide";
+import Loading from "../LoadingComponent/Loading";
 
 const HeaderComponent = () => {
+  const [loading, setloading] = useState(false)
+
+  const dispatch = useDispatch()
+
+  const handleLogout = async () => {
+      setloading(true)
+      await UserService.logoutUser()
+      dispatch(resetUser())
+      setloading(false)
+  }
+
   const user = useSelector((state) => state.user)
   const navigate = useNavigate()
    const handleNavigateLogin = () => { 
     navigate('/sign-in')
-    console.log('user',user)
    }
+   const handleNavigateProfile= () => { 
+    navigate('/profile-user')
+   }
+   const content = (
+    <div>
+      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
+      <WrapperContentPopup onClick={handleNavigateProfile}>Thông tin người dùng</WrapperContentPopup>
+    </div>
+  );
   return (
     <div>
       <WrapperHeader gutter={30}>
@@ -26,8 +48,10 @@ const HeaderComponent = () => {
           />
         </Col>
         <Col span={6} style={{ display: 'flex', alignItems: 'center', gap: '54px' }}>
+
           <WrapperHeaderAccount>
-            
+          <Loading isPending={loading}>
+          <Popover placement="bottom" content={content} >
             <div onClick={handleNavigateLogin} style={{cursor: "pointer"}}><Button 
               style={{
                 display: "flex",
@@ -46,6 +70,8 @@ const HeaderComponent = () => {
             )}
               <CaretDownOutlined />
             </Button></div>
+        </Popover>
+        </Loading>
             
             <WrapperHeaderCart>
               <Button
@@ -67,6 +93,7 @@ const HeaderComponent = () => {
               </Button>
             </WrapperHeaderCart>
           </WrapperHeaderAccount>
+
         </Col>
       </WrapperHeader>
     </div>

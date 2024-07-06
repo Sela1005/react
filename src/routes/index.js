@@ -1,13 +1,12 @@
 import OderPage from "../OrderPage/OrderPage";
 import ProductPage from "../ProductPage/ProductPage";
 import Home from "../page/HomePage/Home";
-import Login from "../page/Login"
 import NotFoundPage from "../page/NotFoundPage/NotFoundPage";
-import Register from "../page/Register"
 import TypeProductPage from "../page/TypeProductPage/TypeProductPage.jsx";
 import SignInPage from "../page/SignInPage/SignInPage.jsx"
 import SignUpPage from "../page/SignUpPage/SignUpPage.jsx"
 import ProductDetails from "../page/ProductDetailsPage/ProductDetailsPage.jsx"
+import ProfilePage from "../page/Profile/ProfilePage.jsx";
 export const routes = [
     {
         path: '/',
@@ -45,16 +44,12 @@ export const routes = [
         isShowHeader: true
     },
     {
-        path: '/login',
-        page: Login,
-    },
-    {
-        path: '/register',
-        page: Register,
-        isShowHeader: true
-    },
-    {
         path: '*',
         page: NotFoundPage
-    }
+    },
+    {
+        path: '/profile-user',
+        page: ProfilePage,
+        isShowHeader: true
+    },
 ]
