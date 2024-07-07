@@ -2,11 +2,16 @@ import React from "react";
 import TypeProduct from "../../component/TypeProduct/TypeProduct";
 import { WapperButtonMore, WapperProduct, WapperTypeProduct } from "./style";
 import SliderComponent from "../../component/SliderComponent/SliderComponent";
-import slider1 from "../../image/slider1.jpg";
-import slider2 from "../../image/silder2.jpg";
-import slider3 from "../../image/slider3.jpg";
+import slide1 from "../../image/slide1.jpg";
+import slide2 from "../../image/slide2.jpg";
+import slide3 from "../../image/slide3.jpg";
+import slide4 from "../../image/slide4.jpg";
+import slide5 from "../../image/slide5.jpg";
 import CardComponent from "../../component/CardComponent/CardComponent";
 import NavBarComponent from "../../component/NavBarComponent/NavBarComponent";
+import { useQuery } from "@tanstack/react-query";
+import * as ProductService from "../../services/ProductService"
+
 
 const Home = () => {
   const arr = [
@@ -16,8 +21,23 @@ const Home = () => {
     "SÁCH THIẾU NHI",
     "GIÁO KHOA - THAM KHẢO",
   ];
+  const fetchProductAll = async () => {
+    const res =  await ProductService.getAllProduct()
+    console.log('res', res)
+    return res
+  }
 
-  const arrImages = [slider1, slider2, slider3];
+  const {isLoading, data: products} = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProductAll,
+    retry: 3,
+    retryDelay: 1000,
+  })
+  console.log('data', products)
+
+
+
+  const arrImages = [slide1,slide2,slide3,slide4,slide5];
 
   return (
     <>
@@ -32,13 +52,22 @@ const Home = () => {
       <SliderComponent arrImages={arrImages}/>
     
     <WapperProduct>
-      <CardComponent/>
-      <CardComponent/>
-      <CardComponent/>
-      <CardComponent/>
-      <CardComponent/>
-      <CardComponent/>
-      <CardComponent/>
+      {products?.data?.map((product)=> {
+        return (
+          <CardComponent 
+            key={product._id} 
+            countInStock={product.countInStock} 
+            description={product.description} 
+            image= {product.image} 
+            name = {product.name}
+            price = {product.price}
+            rating = {product.rating}
+            type={product.type}
+            selled = {product.selled}
+            discount = {product.discount}
+            />
+        )
+      })}
     </WapperProduct>
     <div style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
       <WapperButtonMore textButton='Xem thêm' type='primary' style={{width: '200px', height: '32px', marginTop: '20px'}}/>

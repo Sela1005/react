@@ -10,7 +10,7 @@ const ButtonInputSearch = (props) => {
     <Space.Compact style={{ display: 'flex', width: '100%' }}>
       <Input size={size} placeholder={placeholder} style={{ flex: 1 }} />
       <ButtonComponent 
-        style={{ backgroundColor: "rgb(14, 86, 150)", color: "#fff", border: "none" }} 
+        style={{ background: "#0E5696", color: "#fff", border: "none" }} 
         size={size} 
         icon={<SearchOutlined />}
         type="primary"

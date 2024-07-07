@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { routes } from './routes';
 import HeaderComponent from './component/HeaderComponent/HeaderComponent';
@@ -8,34 +8,27 @@ import { useQuery } from '@tanstack/react-query';
 import { isJsonString } from './utils';
 import {jwtDecode}  from "jwt-decode";
 import * as UserService from './services/UserService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from './slices/userSlide';
+import Loading from './component/LoadingComponent/Loading';
 
 
 const App = () => {
+  
   const dispatch = useDispatch();
-  // const fetchApi = async () => {
-  //   try {
-  //     const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/api/product/get-all`);
-  //     return res.data
-  //   } catch (error) {
-  //     console.error('Error fetching API:', error);
-  //   }
-  // };
-  // const query = useQuery({ queryKey: ['todos'], queryFn: fetchApi })
+  const [isLoading, setIsLoading] = useState(false)
+  const user = useSelector((state) => state.user)
 
-  // // useEffect(() => {
-  // //   fetchApi();
-  // // }, []);
-  // console.log('query', query)
-
-  // console.log('VITE_SERVER_HOST', import.meta.env.VITE_SERVER_HOST);
   useEffect(() => {
+    setIsLoading(true)
     const {storageData, decoded} = handleDecoded()
         if(decoded?.id) {
           handleGetDetailsUser(decoded?.id, storageData)
         }
+    setIsLoading(false)
+
   }, [])
+
 
   
   const handleDecoded = () => {
@@ -47,6 +40,7 @@ const App = () => {
         decoded = jwtDecode(storageData)
     }
     return {decoded, storageData}
+    
   }
 
   UserService.axiosJWT.interceptors.request.use(async function (config) {
@@ -65,26 +59,26 @@ const App = () => {
   const handleGetDetailsUser = async (id, token) => {
     const res = await UserService.getDetailsUser(id,token)
     dispatch(updateUser({...res?.data,access_token: token}))
-    // console.log('res', res?.data)
-    // console.log('access_token',token )
   }
 
   return (
-    
     <div>
-      <Routes>
-        {routes.map((route) => {
-          const Page = route.page;
-          const Layout = route.isShowHeader ? DefaultComponent : Fragment;
-          return (
-            <Route key={route.path} path={route.path} element={
-              <Layout>
-                <Page />
-              </Layout>
-            } />
-          );
-        })}
-      </Routes>
+      <Loading isPending={isLoading} style={{background: 'red'}}>
+        <Routes>
+          {routes.map((route) => {
+            const Page = route.page;
+            const isCheckAuth = !route.isPrivate || user.isAdmin
+            const Layout = route.isShowHeader ? DefaultComponent : Fragment;
+            return (
+              <Route key={route.path} path={isCheckAuth? route.path:undefined} element={
+                <Layout>
+                  <Page />
+                </Layout>
+              } />
+            );
+          })}
+        </Routes>
+      </Loading>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { Badge, Button, Col, Flex, Popover } from "antd";
-import React, { useState } from "react";
-import { WrapperContentPopup, WrapperHeader, WrapperHeaderAccount, WrapperHeaderCart } from "./Style";
+import React, { useEffect, useState } from "react";
+import {WrapperContentPopup, WrapperHeader, WrapperHeaderAccount, WrapperHeaderCart } from "./Style";
 import { CaretDownOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
 import ButtonInputSearch from "../ButtonInputSearch/ButtonInputSearch";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,9 @@ import { resetUser } from "../../slices/userSlide";
 import Loading from "../LoadingComponent/Loading";
 
 const HeaderComponent = () => {
+  const user = useSelector((state) => state.user)
+  const [userName, setUserName] = useState('')
+  const [userAvatar, setUserAvatar] = useState('')
   const [loading, setloading] = useState(false)
 
   const dispatch = useDispatch()
@@ -21,7 +24,13 @@ const HeaderComponent = () => {
       setloading(false)
   }
 
-  const user = useSelector((state) => state.user)
+  useEffect(() => {
+    setloading(true)
+    setUserName(user?.name)
+    setUserAvatar(user?.avatar)
+    setloading(false)
+  },[user?.name, user?.avatar])
+
   const navigate = useNavigate()
    const handleNavigateLogin = () => { 
     navigate('/sign-in')
@@ -29,10 +38,16 @@ const HeaderComponent = () => {
    const handleNavigateProfile= () => { 
     navigate('/profile-user')
    }
+   const handleNavigateAdmin= () => { 
+    navigate('/system/admin')
+   }
    const content = (
     <div>
-      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
+      {user?.isAdmin && (
+      <WrapperContentPopup onClick={handleNavigateAdmin}>Quản lý hệ thống</WrapperContentPopup>)}
+      
       <WrapperContentPopup onClick={handleNavigateProfile}>Thông tin người dùng</WrapperContentPopup>
+      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
     </div>
   );
   return (
@@ -45,13 +60,14 @@ const HeaderComponent = () => {
             textButton="Search"
             size="large"
             
+            
           />
         </Col>
         <Col span={6} style={{ display: 'flex', alignItems: 'center', gap: '54px' }}>
 
           <WrapperHeaderAccount>
           <Loading isPending={loading}>
-          <Popover placement="bottom" content={content} >
+          <Popover placement="bottomRight" content={content} >
             <div onClick={handleNavigateLogin} style={{cursor: "pointer"}}><Button 
               style={{
                 display: "flex",
@@ -62,9 +78,19 @@ const HeaderComponent = () => {
               }}
               type="primary"
             >
-              <UserOutlined style={{ fontSize: "20px" }} />
-              {user?.name ? (
-                <div style={{cursor: "pointer", padding: '5px'}}>{user.name}</div>
+              {userAvatar ? (
+                <img src={userAvatar} alt="avatar" style={{
+                  height: '30px',
+                  width: '30px',
+                  borderRadius: '50%',
+                  objectFit: 'contain',
+                }} />
+              ) : (
+                <UserOutlined style={{ fontSize: "20px" }} />
+              )}
+              
+              {user?.access_token ? (
+                <div style={{cursor: "pointer", padding: '5px'}}>{userName?.length ? userName: user?.email}</div>
             ):(
               'Đăng Nhập/Đăng ký'
             )}

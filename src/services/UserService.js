@@ -34,3 +34,12 @@ export const logoutUser = async () => {
     const res = await axios.post(`${import.meta.env.VITE_SERVER_HOST}/user/log-out`)
     return res.data
 }
+
+export const updateUser = async (id,data,access_token) => { 
+    const res = await axiosJWT.put(`${import.meta.env.VITE_SERVER_HOST}/user/update-user/${id}`,data,{
+        headers: {
+            token: `Bearer ${access_token}`,
+        },
+    })
+    return res.data
+}

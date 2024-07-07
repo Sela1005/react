@@ -7,6 +7,8 @@ import SignInPage from "../page/SignInPage/SignInPage.jsx"
 import SignUpPage from "../page/SignUpPage/SignUpPage.jsx"
 import ProductDetails from "../page/ProductDetailsPage/ProductDetailsPage.jsx"
 import ProfilePage from "../page/Profile/ProfilePage.jsx";
+import AdminPage from "../page/AdminPage/AdminPage.jsx";
+import { TRUE } from "sass";
 export const routes = [
     {
         path: '/',
@@ -44,12 +46,18 @@ export const routes = [
         isShowHeader: true
     },
     {
-        path: '*',
-        page: NotFoundPage
+        path: '/system/admin',
+        page: AdminPage,
+        isShowHeader: true,
+        isPrivate: true
     },
     {
         path: '/profile-user',
         page: ProfilePage,
         isShowHeader: true
     },
+    {
+        path: '*',
+        page: NotFoundPage
+    }
 ]

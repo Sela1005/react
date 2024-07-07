@@ -56,27 +56,27 @@ const SignInPage = () => {
   const handleOnchangeConfirmPasswordRegister = (value) => {
     setConfirmPasswordRegister(value);
   };
-
   useEffect(() => {
-    if (isLoginSuccess) {
+    if(loginData?.status === 'ERR'){
+      message.error("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
+      return
+    }
+    else if (isLoginSuccess) {
       message.success("Đăng nhập thành công!")
       navigate('/')
       localStorage.setItem('access_token',JSON.stringify(loginData?.access_token))
       if(loginData?.access_token){
         const decoded = jwtDecode(loginData?.access_token)
-        console.log('decoded',decoded)
         if(decoded?.id) {
           handleGetDetailsUser(decoded?.id, loginData?.access_token)
         }
       }
     }
-  }, [isLoginSuccess]);
+  }, [isLoginSuccess, isLoginError])
 
   const handleGetDetailsUser = async (id, token) => {
     const res = await UserService.getDetailsUser(id,token)
     dispatch(updateUser({...res?.data,access_token: token}))
-    // console.log('res', res?.data)
-    // console.log('access_token',token )
   }
 
   useEffect(() => {
@@ -94,7 +94,6 @@ const SignInPage = () => {
       password: passwordRegister,
       confirmPassword: confirmPasswordRegister
     });
-    console.log('sign-up', emailRegister, passwordRegister, confirmPasswordRegister);
   };
 
   const handleSignIn = () => {
@@ -102,7 +101,6 @@ const SignInPage = () => {
       email: emailLogin,
       password: passwordLogin
     });
-    console.log('sign-in', emailLogin, passwordLogin);
   };
 
   return (
@@ -163,7 +161,7 @@ const SignInPage = () => {
                 </InputWrapper>
                 <InputWrapper>
                   <p>Nhập lại mật khẩu</p>
-                  <InputForm placeholder='Nhập lại mật khẩu' value={confirmPasswordRegister} onChange={handleOnchangeConfirmPasswordRegister} />
+                  <InputFormPassword placeholder='Nhập lại mật khẩu' value={confirmPasswordRegister} onChange={handleOnchangeConfirmPasswordRegister} />
                 </InputWrapper>
                 {registerData?.status === 'ERR' && <span style={{ color: 'red' }}>{registerData?.message}</span>}
                 <ButtonWrapper>
