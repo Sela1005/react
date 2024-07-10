@@ -73,7 +73,6 @@ const AdminProduct = () => {
   const { data, isPending, isSuccess, isError } = mutation;
   const { data:dataUpdated, isPending: isLoadingUpdated, isSuccess:isSuccessUpdated, isError:isErrorUpdated } = mutationUpdate;
 console.log('dataUpdated',dataUpdated)
-
   const {isPending: isLoadingProducts, data: products} = useQuery({queryKey:['products'],queryFn: getAllProduct})
 
 
@@ -222,11 +221,14 @@ console.log('dataUpdated',dataUpdated)
 
     },
   ];
-
   const onUpdateProduct = () => {
-    mutationUpdate.mutate({id: rowSelected, token: user?.access_token, stateProductDetails})
+    form.validateFields().then(values => {
+      mutationUpdate.mutate({id: rowSelected, token: user?.access_token, ...values});
+    }).catch(info => {
+      console.log('Validate Failed:', info);
+    });
   }
-
+  
   
   return (
     <div>
