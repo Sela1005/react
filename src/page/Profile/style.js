@@ -14,7 +14,7 @@ export const WrapperContentProfile = styled.div`
     display: flex;
     flex-direction: column;
     border: 1px solid #ccc;
-    width: 500px;
+    width: 400px;
     margin: 0 auto;
     padding: 30px;
     border-radius: 10px;

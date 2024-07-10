@@ -1,135 +1,76 @@
-import {  BookOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { Layout, Menu, Switch } from 'antd'
-import React, { useState } from 'react'
+import { BookOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { Layout, Menu, Switch } from 'antd';
+import React, { useState } from 'react';
+import AdminUser from '../../component/AdminUser/AdminUser';
+import AdminProduct from '../../component/AdminProduct/AdminProduct';
 
 const items = [
   {
-    key: 'sub1',
+    key: 'user',
     label: 'Người dùng',
     icon: <UserOutlined />,
-    children: [
-      {
-        key: '1',
-        label: 'Option 1',
-      },
-      {
-        key: '2',
-        label: 'Option 2',
-      },
-      {
-        key: '3',
-        label: 'Option 3',
-      },
-      {
-        key: '4',
-        label: 'Option 4',
-      },
-    ],
   },
   {
-    key: 'sub2',
+    key: 'product',
     label: 'Sản phẩm',
     icon: <BookOutlined />,
-    children: [
-      {
-        key: '5',
-        label: 'Option 5',
-      },
-      {
-        key: '6',
-        label: 'Option 6',
-      },
-      {
-        key: 'sub3',
-        label: 'Submenu',
-        children: [
-          {
-            key: '7',
-            label: 'Option 7',
-          },
-          {
-            key: '8',
-            label: 'Option 8',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'sub4',
-    label: 'BLA BLA',
-    icon: <SettingOutlined />,
-    children: [
-      {
-        key: '9',
-        label: 'Option 9',
-      },
-      {
-        key: '10',
-        label: 'Option 10',
-      },
-      {
-        key: '11',
-        label: 'Option 11',
-      },
-      {
-        key: '12',
-        label: 'Option 12',
-      },
-    ],
   },
 ];
 
 const AdminPage = () => {
   const [theme, setTheme] = useState('light');
-  const [current, setCurrent] = useState('1');
+  const [key, setKey] = useState('user');
+
   const changeTheme = (value) => {
     setTheme(value ? 'dark' : 'light');
   };
 
-  
-  const onClick = (e) => {
-    console.log('click ', e);
-    setCurrent(e.key); // Set current key when menu item is clicked
-    // Perform additional actions based on the clicked item key
-    // For example, navigate to a different page or perform some logic
-    switch (e.key) {
-      case '1':
-        // Handle Option 1 click
-        break;
-      case '2':
-        // Handle Option 2 click
-        break;
-      // Add more cases as needed for other menu items
+  const handleOnClick = (e) => {
+    setKey(e.key);
+  };
+
+  const renderPage = (key) => {
+    switch (key) {
+      case 'user':
+        return( 
+        <AdminUser />
+        )
+      case 'product':
+        return(
+           <AdminProduct />
+          )
       default:
-        break;
+        return <></>
     }
   };
+
   return (
-  <div style={{ background: theme === 'dark' ? '#001529' : '#ccc' }}>
-    <div style={{ background: theme === 'dark' ? '#001529' : '#ffff', padding: '10px' }}>
+    <div style={{ display: 'flex', background: theme === 'dark' ? '#001529' : '#ffff' }}>
+      <Menu
+        theme={theme}
+        onClick={handleOnClick}
+        style={{
+          width: 220,
+          height: '100vh',
+          boxShadow: '1px 1px 2px #ccc',
+        }}
+        defaultOpenKeys={['user']}
+        selectedKeys={[key]}
+        mode="inline"
+        items={items}
+      />
       <Switch
         checked={theme === 'dark'}
         onChange={changeTheme}
         checkedChildren="Dark"
         unCheckedChildren="Light"
+        style={{ position: 'absolute', right: '20px', top: '20px' }}
       />
+      <div style={{ flex: 1, padding: '15px'}}>
+        {renderPage(key)}
+      </div>
     </div>
-      <Menu
-        theme={theme}
-        onClick={onClick}
-        style={{
-          width: 200,
-          height: 700
-        }}
-        defaultOpenKeys={['sub1']}
-        selectedKeys={[current]}
-        mode="inline"
-        items={items}
-      />
+  );
+};
 
-    </div>
-  )
-}
-
-export default AdminPage
+export default AdminPage;

@@ -41,10 +41,10 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if(isSuccess){
-      message.success()
+      message.success("Cập nhật thành công")
       handleGetDetailsUser(user?.id, user?.access_token)
     }else if (isError){
-      message.error()
+      message.error("Lỗi")
     }
   },[isSuccess, isError])
 
@@ -93,64 +93,24 @@ const ProfilePage = () => {
           <WappperLabel htmlFor='name'>Name: </WappperLabel>
           </div>
             <InputForm style= {{width: '300px'}} placeholder='Họ và tên' value={name} onChange={handleOnchangeName} id="name" />
-            <ButtonComponent
-                      onClick={handleUpdate}
-                      textButton="Cập nhật"
-                      type="primary"
-                      style={{
-                        width: "150px",
-                        height: "34px",
-                        background: "rgb(69, 136, 181)",
-                      }}
-                    />
         </WrapperInput>
         <WrapperInput>
         <div style={{width: '50px',height: 'fit-content'}}>
           <WappperLabel htmlFor='email'>Email: </WappperLabel>
           </div>
             <InputForm style= {{width: '300px'}} placeholder='Email' value={email} onChange={handleOnchangeEmail} id="email" />
-            <ButtonComponent
-                      onClick={handleUpdate}
-                      textButton="Cập nhật"
-                      type="primary"
-                      style={{
-                        width: "150px",
-                        height: "34px",
-                        background: "rgb(69, 136, 181)",
-                      }}
-                    />
         </WrapperInput>
         <WrapperInput>
         <div style={{width: '50px',height: 'fit-content'}}>
           <WappperLabel htmlFor='phone'>Phone: </WappperLabel>
           </div>
             <InputForm style= {{width: '300px'}} placeholder='Số điện thoại' value={phone} onChange={handleOnchangePhone} id="phone" />
-            <ButtonComponent
-                      onClick={handleUpdate}
-                      textButton="Cập nhật"
-                      type="primary"
-                      style={{
-                        width: "150px",
-                        height: "34px",
-                        background: "rgb(69, 136, 181)",
-                      }}
-                    />
         </WrapperInput>
         <WrapperInput>
           <div style={{width: '50px',height: 'fit-content'}}>
           <WappperLabel htmlFor='address'>Address: </WappperLabel>
           </div>
             <InputForm style= {{width: '300px'}} placeholder='Địa chỉ' value={address} onChange={handleOnchangeAddress} id="address" />
-            <ButtonComponent
-                      onClick={handleUpdate}
-                      textButton="Cập nhật"
-                      type="primary"
-                      style={{
-                        width: "150px",
-                        height: "34px",
-                        background: "rgb(69, 136, 181)",
-                      }}
-                    />
         </WrapperInput>
         <WrapperInput>
         <div style={{width: '50px',height: 'fit-content'}}>
@@ -167,7 +127,6 @@ const ProfilePage = () => {
                   objectFit: 'cover',
                 }} alt="avatar"/>
               )}
-            {/* <InputForm style= {{width: '300px'}} placeholder='Avatar' value={avatar} onChange={handleOnchangeAvatar} id="avatar" /> */}
             <ButtonComponent
                       onClick={handleUpdate}
                       textButton="Cập nhật"

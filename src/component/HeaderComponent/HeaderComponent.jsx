@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as UserService from '../../services/UserService';
 import { resetUser } from "../../slices/userSlide";
 import Loading from "../LoadingComponent/Loading";
+import Logo from "../../image/logo_theWorldBook7.jpg"
 
 const HeaderComponent = () => {
   const user = useSelector((state) => state.user)
@@ -21,6 +22,7 @@ const HeaderComponent = () => {
       setloading(true)
       await UserService.logoutUser()
       dispatch(resetUser())
+      navigate('/')
       setloading(false)
   }
 
@@ -41,6 +43,9 @@ const HeaderComponent = () => {
    const handleNavigateAdmin= () => { 
     navigate('/system/admin')
    }
+   const handleNavigateLogo= () => { 
+    navigate('/')
+   }
    const content = (
     <div>
       {user?.isAdmin && (
@@ -53,7 +58,15 @@ const HeaderComponent = () => {
   return (
     <div>
       <WrapperHeader gutter={30}>
-        <Col span={5}>Logo</Col>
+        <Col span={5} >
+        <div onClick={handleNavigateLogo}>
+        <img style={{height: '40px', width: '40px',cursor: "pointer"}} src={Logo}></img>
+        <span style={{marginLeft:'20px', fontSize: '20px', color: 'white',cursor: "pointer"}}>
+          TheWordBook
+        </span>
+        </div>
+        
+        </Col>
         <Col span={13}>
           <ButtonInputSearch
             placeholder="Tìm kiếm... "
@@ -67,7 +80,7 @@ const HeaderComponent = () => {
 
           <WrapperHeaderAccount>
           <Loading isPending={loading}>
-          <Popover placement="bottomRight" content={content} >
+          <Popover placement="bottomRight" content={user?.access_token ? content : null}>
             <div onClick={handleNavigateLogin} style={{cursor: "pointer"}}><Button 
               style={{
                 display: "flex",
