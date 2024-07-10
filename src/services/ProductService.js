@@ -13,9 +13,17 @@ export const getDetailsProduct = async (id) => {
     const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-details/${id}`)
     return res.data
 }
-
 export const updateProduct = async (id, access_token, data) => { 
     const res = await axiosJWT.put(`${import.meta.env.VITE_SERVER_HOST}/product/update/${id}`, data,{
+        headers: {
+            token: `Bearer ${access_token}`,
+        },
+    });
+    return res.data
+}
+
+export const deleteProduct = async (id, access_token) => { 
+    const res = await axiosJWT.delete(`${import.meta.env.VITE_SERVER_HOST}/product/delete/${id}`, {
         headers: {
             token: `Bearer ${access_token}`,
         },

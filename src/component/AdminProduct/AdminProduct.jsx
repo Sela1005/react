@@ -13,6 +13,7 @@ import * as message from "../../component/Messages/Message";
 import { useQuery } from '@tanstack/react-query';
 import DrawerComponent from '../DrawerComponent/DrawerComponent';
 import { useSelector } from 'react-redux';
+import ModalComponent from '../ModalComponent/ModalComponent';
 
 const AdminProduct = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +23,8 @@ const AdminProduct = () => {
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false)
 
   const [isOpenDrawer,setIsOpenDrawer] = useState(false)
+
+  const [isModalOpenDelete, setIsModalOpenDelete] =useState(false)
 
   const [stateProduct, setStateProduct] = useState({
     name: '',
@@ -58,9 +61,18 @@ const AdminProduct = () => {
   const mutationUpdate = useMutationHooks(
     (data) => {
         const { id, token,...rests } = data;
-        const res =  ProductService.updateProduct(id, token,rests)
+        const res =  ProductService.updateProduct(id, token,{...rests})
         return res;
-  });
+  },
+);
+
+const mutationDelete = useMutationHooks(
+  (data) => {
+      const { id, token} = data;
+      const res =  ProductService.deleteProduct(id, token)
+      return res;
+},
+);
 
 
   const getAllProduct = async () => {
@@ -71,9 +83,11 @@ const AdminProduct = () => {
 
 
   const { data, isPending, isSuccess, isError } = mutation;
-  const { data:dataUpdated, isPending: isLoadingUpdated, isSuccess:isSuccessUpdated, isError:isErrorUpdated } = mutationUpdate;
-console.log('dataUpdated',dataUpdated)
-  const {isPending: isLoadingProducts, data: products} = useQuery({queryKey:['products'],queryFn: getAllProduct})
+  const { data:dataUpdated, isPending: isLoadingUpdated, isSuccess:isSuccessUpdated, isError:isErrorUpdated } = mutationUpdate
+  const { data:dataDeleted, isPending: isLoadingDeleted, isSuccess:isSuccessDeleted, isError:isErrorDeleted } = mutationDelete
+
+  const queryProduct= useQuery({queryKey:['products'],queryFn: getAllProduct})
+  const {isPending: isLoadingProducts, data: products} =queryProduct
 
 
   const dataTable = products?.data?.length ? products.data.map(product => ({
@@ -85,18 +99,64 @@ console.log('dataUpdated',dataUpdated)
     if (isSuccess && data?.status === 'OK'){
       message.success("Thêm sản phẩm thành công!!")
       setIsModalOpen(false)
+      handleCancel()
     }else if(isError) {
       message.error("Thêm sản phẩm thất bại!!")
     }
-  },[isSuccess,isError])
+  },[isSuccess])
+
+  useEffect(() => { 
+    if (isSuccessDeleted && dataDeleted?.status === 'OK'){
+      message.success("Xóa sản phẩm thành công!!")
+      handleCancelDelete()
+    }else if(isErrorDeleted) {
+      message.error("Xóa sản phẩm thất bại!!")
+    }
+  },[isSuccessDeleted])
+
+  useEffect(() => { 
+    if (isSuccessUpdated && dataUpdated?.status === 'OK'){
+      message.success("Cập nhật sản phẩm thành công!!")
+      handleCancelDrawer()
+    }else if(isErrorUpdated) {
+      message.error("Cập nhật sản phẩm thất bại!!")
+    }
+  },[isSuccessUpdated])
 
   const onFinish = () => {
-    mutation.mutate(stateProduct);
+    mutation.mutate(stateProduct, {
+      onSettled: () => {
+        queryProduct.refetch()
+      }
+    })
+  }
+  const handleCancelDelete = () => {
+    setIsModalOpenDelete(false)
+  }
+  const handleDeleteProduct = () => {
+    mutationDelete.mutate({id: rowSelected,token: user?.access_token},{
+      onSettled: () => {
+        queryProduct.refetch()
+      }
+    })
   }
 
   const handleCancel = () => {
     setIsModalOpen(false)
       setStateProduct({
+        name: '',
+        price: '',
+        description: '',
+        rating: '',
+        image: '',
+        type: '',
+        countInStock: ''
+      })
+    form.resetFields()
+  };
+  const handleCancelDrawer = () => {
+    setIsOpenDrawer(false)
+      setStateProductDetails({
         name: '',
         price: '',
         description: '',
@@ -153,46 +213,46 @@ console.log('dataUpdated',dataUpdated)
 
 
   const fetchDetailsProduct = async (rowSelected) => {
-    const res = await ProductService.getDetailsProduct(rowSelected)
-    if(res?.data){
-      setStateProductDetails({
-        name: res?.data?.name,
-        price: res?.data?.price,
-        description: res?.data?.description,
-        rating: res?.data?.rating,
-        image: res?.data?.image,
-        type: res?.data?.type,
-        countInStock: res?.data?.countInStock
-      })
+    if (rowSelected) {
+      const res = await ProductService.getDetailsProduct(rowSelected);
+      if (res?.data) {
+        setStateProductDetails({
+          name: res?.data?.name,
+          price: res?.data?.price,
+          description: res?.data?.description,
+          rating: res?.data?.rating,
+          image: res?.data?.image,
+          type: res?.data?.type,
+          countInStock: res?.data?.countInStock
+        });
+      }
+      setIsLoadingUpdate(false);
     }
-    setIsLoadingUpdate(false)
   }
+
   
   useEffect(()=>{
     form.setFieldsValue(stateProductDetails)
   },[form, stateProductDetails])
 
-    useEffect(() => {
-      if(rowSelected) {
-        fetchDetailsProduct(rowSelected)
-      }
-    },[rowSelected])
+  useEffect(() => {
+    if(rowSelected) {
+      setIsLoadingUpdate(true)
+      fetchDetailsProduct(rowSelected)
+    }
+  },[rowSelected]) 
 
 
   const handleDetailsProduct = () => {
-    if(rowSelected){
-      setIsLoadingUpdate(true)
-      fetchDetailsProduct()
-
-    }
     setIsOpenDrawer(true)
   }
+
 
 
   const renderAction = () => { 
     return (
       <div>
-        <DeleteOutlined style={{color: 'red', fontSize: '25px', cursor:'pointer'}} />
+        <DeleteOutlined style={{color: 'red', fontSize: '25px', cursor:'pointer'}} onClick={() => setIsModalOpenDelete(true)} />
         <EditOutlined style={{color: '#4588B5', fontSize: '25px', cursor:'pointer'}} onClick={handleDetailsProduct} />
       </div>
     )
@@ -222,14 +282,14 @@ console.log('dataUpdated',dataUpdated)
     },
   ];
   const onUpdateProduct = () => {
-    form.validateFields().then(values => {
-      mutationUpdate.mutate({id: rowSelected, token: user?.access_token, ...values});
-    }).catch(info => {
-      console.log('Validate Failed:', info);
-    });
+      mutationUpdate.mutate({id: rowSelected, token: user?.access_token, ...stateProductDetails}, {
+        onSettled: () => {
+          queryProduct.refetch()
+        }
+      })
   }
   
-  
+  console.log('rowSelected', rowSelected)
   return (
     <div>
       <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
@@ -247,17 +307,16 @@ console.log('dataUpdated',dataUpdated)
         </Button>
       </div>
       <div style={{ marginTop: '20px' }}>
-        <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}
+      <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}
          onRow={(record, rowIndex) => {
           return {
           onClick: event => {
             setRowSelected(record._id)
-            console.log(record)
           },
         };
         }} />
       </div>
-      <Modal title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
+      <ModalComponent title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
         <Loading isPending={isLoadingProducts}>
           <Form
             name="basic"
@@ -389,9 +448,9 @@ console.log('dataUpdated',dataUpdated)
             </Form.Item>
                 </Form>
             </Loading>
-        </Modal>
+        </ModalComponent>
         <DrawerComponent title='Chi tiết sản phẩm' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)} width="50%">
-        <Loading isPending={isLoadingUpdate}>
+        <Loading isPending={isLoadingUpdate || isLoadingUpdated}>
           <Form
             name="basic"
             labelCol={{
@@ -404,7 +463,7 @@ console.log('dataUpdated',dataUpdated)
               maxWidth: 600,
             }}
             onFinish={onUpdateProduct}
-            autoComplete="on"
+            autoComplete="off"
             form={form}
           >
             <Form.Item
@@ -523,6 +582,12 @@ console.log('dataUpdated',dataUpdated)
                 </Form>
             </Loading>
         </DrawerComponent>
+
+      <ModalComponent title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
+        <Loading isPending={isLoadingDeleted}> 
+            <div>Bạn có chắc xóa sản phẩm này không?</div>
+        </Loading>
+      </ModalComponent>
     </div>
   )
 }
