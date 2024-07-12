@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { WrapperHeader } from './style';
-import { Button, Form, Modal, Upload } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusSquareTwoTone, UploadOutlined } from '@ant-design/icons';
+import { Button, Form, Modal, Space, Upload } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusSquareTwoTone, SearchOutlined, UploadOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../InputConponent/InputConponent';
 import { getBase64 } from '../../utils';
@@ -16,6 +16,10 @@ import { useSelector } from 'react-redux';
 import ModalComponent from '../ModalComponent/ModalComponent';
 
 const AdminProduct = () => {
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [rowSelected, setRowSelected] = useState('')
@@ -257,22 +261,134 @@ const mutationDelete = useMutationHooks(
       </div>
     )
   }
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <InputComponent
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    // render: (text) =>
+    //   searchedColumn === dataIndex ? (
+    //     <Highlighter
+    //       highlightStyle={{
+    //         backgroundColor: '#ffc069',
+    //         padding: 0,
+    //       }}
+    //       searchWords={[searchText]}
+    //       autoEscape
+    //       textToHighlight={text ? text.toString() : ''}
+    //     />
+    //   ) : (
+    //     text
+    //   ),
+  });
+
+
+
   const columns = [
     {
       title: 'Name',
       dataIndex: 'name',
+      sorter: (a,b) => a.name.length - b.name.length,
+      ...getColumnSearchProps('name')
     },
     {
       title: 'Price',
       dataIndex: 'price',
+      sorter: (a,b) => a.price - b.price
     },
     {
       title: 'Rating',
       dataIndex: 'rating',
+      sorter: (a,b) => a.rating - b.rating
     },
     {
       title: 'Type',
       dataIndex: 'type',
+      ...getColumnSearchProps('type')
     },
     {
       title: 'Action',
@@ -316,7 +432,7 @@ const mutationDelete = useMutationHooks(
         };
         }} />
       </div>
-      <ModalComponent title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
+      <ModalComponent forceRender title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
         <Loading isPending={isLoadingProducts}>
           <Form
             name="basic"
@@ -583,7 +699,7 @@ const mutationDelete = useMutationHooks(
             </Loading>
         </DrawerComponent>
 
-      <ModalComponent title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
+      <ModalComponent forceRender title="Xóa sản phẩm" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteProduct}>
         <Loading isPending={isLoadingDeleted}> 
             <div>Bạn có chắc xóa sản phẩm này không?</div>
         </Loading>

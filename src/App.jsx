@@ -34,7 +34,6 @@ const App = () => {
   const handleDecoded = () => {
     let storageData = localStorage.getItem('access_token')
     let decoded = {}
-    console.log('storageData',storageData,isJsonString(storageData))
     if(storageData && isJsonString(storageData)) {
       storageData = JSON.parse(storageData)
         decoded = jwtDecode(storageData)
