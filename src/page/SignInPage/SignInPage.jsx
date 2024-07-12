@@ -20,8 +20,8 @@ import * as message from "../../component/Messages/Message";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {useDispatch} from "react-redux"
-import { updateUser } from "../../slices/userSlide";
 import InputFormPassword from "../../component/InputForm/InputFormPassword";
+import { updateUser } from "../../redux/slices/userSlide";
 
 const SignInPage = () => {
   const navigate = useNavigate();

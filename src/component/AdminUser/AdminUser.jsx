@@ -32,13 +32,7 @@ const AdminUser = () => {
 
   const [isModalOpenDelete, setIsModalOpenDelete] =useState(false)
 
-  const [stateUser, setStateUser] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    isAdmin: false,
-    createdAt: '',
-  });
+
 
   const user = useSelector((state) => state?.user)
 
@@ -48,6 +42,8 @@ const AdminUser = () => {
     phone: '',
     isAdmin: false,
     createdAt: '',
+    avatar: '',
+    address: ''
   });
 
   const [form] = Form.useForm();
@@ -120,16 +116,7 @@ const mutationDelete = useMutationHooks(
     })
   }
 
-  const handleCancel = () => {
-    setIsModalOpen(false)
-      setStateUser({
-        name: '',
-        email: '',
-        phone: '',
-        isAdmin: false,
-      })
-    form.resetFields()
-  };
+
   const handleCancelDrawer = () => {
     setIsOpenDrawer(false)
       setStateUserDetails({
@@ -137,16 +124,13 @@ const mutationDelete = useMutationHooks(
         email: '',
         phone: '',
         isAdmin: false,
+        createdAt: '',
+        avatar: '',
+        address: ''
       })
     form.resetFields()
   };
 
-  const handleOnchange = (e) => {
-    setStateUser({
-     ...stateUser,
-      [e.target.name]: e.target.value,
-    });
-  };
   const handleOnchangeDetails = (e) => {
     setStateUserDetails({
      ...stateUserDetails,
@@ -162,7 +146,7 @@ const mutationDelete = useMutationHooks(
       }
       setStateUserDetails({
        ...stateUserDetails,
-        image: file.preview,
+        avatar: file.preview,
       });
     } catch (error) {
       console.error("Error converting file to base64: ", error);
@@ -178,6 +162,9 @@ const mutationDelete = useMutationHooks(
           name: res?.data?.name,
           email: res?.data?.email,
           isAdmin: res?.data?.isAdmin,
+          address: res?.data?.address,
+          phone: res?.data?.phone,
+          avatar: res?.data?.avatar,
         });
       }
       setIsLoadingUpdate(false);
@@ -200,8 +187,11 @@ const mutationDelete = useMutationHooks(
   const handleDetailsUser = () => {
     setIsOpenDrawer(true)
   }
-
-
+  const headers = [
+    { label: "Tên Người dùng", key: "name" },
+    { label: "Email", key: "email" },
+    { label: "Phone", key: "phone" },
+  ];
 
   const renderAction = () => { 
     return (
@@ -343,6 +333,12 @@ const mutationDelete = useMutationHooks(
       ...getColumnSearchProps('phone')
     },
     {
+      title: 'Address',
+      dataIndex: 'address',
+      sorter: (a,b) => a.address - b.address,
+      ...getColumnSearchProps('address')
+    },
+    {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       sorter: (a,b) => a.createdAt - b.createdAt,
@@ -367,6 +363,8 @@ const mutationDelete = useMutationHooks(
       <WrapperHeader> Quản lý người dùng </WrapperHeader>
       <div style={{ marginTop: "30px" }}>
         <TableComponent
+          filename={"User"}
+          headers={headers}
           columns={columns}
           isLoading={isLoadingUsers}
           data={dataTable}
@@ -449,6 +447,22 @@ const mutationDelete = useMutationHooks(
                 name="phone"
               />
             </Form.Item>
+
+            <Form.Item
+              label="Address"
+              name="address"
+              rules={[
+                {
+                  required: false,
+                },
+              ]}
+            >
+              <InputComponent
+                value={stateUserDetails.address}
+                onChange={handleOnchangeDetails}
+                name="address"
+              />
+            </Form.Item>
             <Form.Item
               label="IsAdmin"
               name="isAdmin"
@@ -465,13 +479,12 @@ const mutationDelete = useMutationHooks(
               />
             </Form.Item>
 
-            {/* <Form.Item
-              label="Image"
-              name="image"
+            <Form.Item
+              label="Avatar"
+              name="avatar"
               rules={[
                 {
                   required: false,
-                  message: "Please input image!",
                 },
               ]}
             >
@@ -481,9 +494,9 @@ const mutationDelete = useMutationHooks(
               >
                 <Button icon={<UploadOutlined />}>Select File</Button>
               </WapperUploadFile>
-              {stateUserDetails?.image && (
+              {stateUserDetails?.avatar && (
                 <img
-                  src={stateUserDetails?.image}
+                  src={stateUserDetails?.avatar}
                   style={{
                     height: "60px",
                     width: "60px",
@@ -495,7 +508,7 @@ const mutationDelete = useMutationHooks(
                   alt="avatar"
                 />
               )}
-            </Form.Item> */}
+            </Form.Item>
 
             <Form.Item
               wrapperCol={{

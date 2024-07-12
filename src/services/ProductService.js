@@ -1,8 +1,13 @@
 import axios from "axios"
 import { axiosJWT } from "./UserService"
 
-export const getAllProduct = async () => { 
-    const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all`)
+export const getAllProduct = async (search) => { 
+    let res = {}
+    if(search?.length > 0){
+        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?filter=name&filter=${search}`)
+    }else{
+        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all`)
+    }
     return res.data
 }
 export const createProduct = async (data) => { 
