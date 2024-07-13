@@ -64,12 +64,14 @@ const mutationDelete = useMutationHooks(
 },
 );
 
+const getAllUser = async () => {
+  const token = user?.access_token;
+  console.log('token',token)
+  const res = await UserService.getAllUser(token);
+  console.log('res', res);
+  return res;
+}
 
-  const getAllUser = async () => {
-    const res = await UserService.getAllUser();
-    console.log('res', res)
-    return res
-  }
   
 
 

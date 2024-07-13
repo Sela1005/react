@@ -1,15 +1,24 @@
 import axios from "axios"
 import { axiosJWT } from "./UserService"
 
-export const getAllProduct = async (search) => { 
+export const getAllProduct = async (search,limit) => { 
     let res = {}
     if(search?.length > 0){
-        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?filter=name&filter=${search}`)
+        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?filter=name&filter=${search}&limit=${limit}`)
     }else{
-        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all`)
+        res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?limit=${limit}`)
     }
     return res.data
 }
+
+export const getProductType = async (type) => { 
+    if(type){
+        const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?filter=type&filter=${type}`)
+        return res.data
+    }
+}
+
+
 export const createProduct = async (data) => { 
     const res = await axios.post(`${import.meta.env.VITE_SERVER_HOST}/product/create`,data)
     return res.data
@@ -33,5 +42,9 @@ export const deleteProduct = async (id, access_token) => {
             token: `Bearer ${access_token}`,
         },
     });
+    return res.data
+}
+export const getAllTypeProduct = async () => { 
+    const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all-type`);
     return res.data
 }

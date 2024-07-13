@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { WrapperHeader } from "./style";
-import { Button, Form, Modal, Space, Upload } from "antd";
+import { Button, Form, Modal, Select, Space, Upload } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import TableComponent from "../TableComponent/TableComponent";
 import InputComponent from "../InputConponent/InputConponent";
-import { getBase64 } from "../../utils";
+import { getBase64, renderOption } from "../../utils";
 import { WapperUploadFile } from "./style";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import * as ProductService from "../../services/ProductService";
@@ -40,6 +40,8 @@ const AdminProduct = () => {
 
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
 
+  const [typeSelect, setTypeSelect] = useState("");
+
   const [stateProduct, setStateProduct] = useState({
     name: "",
     price: "",
@@ -48,6 +50,7 @@ const AdminProduct = () => {
     image: "",
     type: "",
     countInStock: "",
+    newType: ""
   });
 
   const user = useSelector((state) => state?.user);
@@ -110,10 +113,21 @@ const AdminProduct = () => {
     isError: isErrorDeleted,
   } = mutationDelete;
 
+  const fetchAllTypeProduct = async () => {
+    const res = await ProductService.getAllTypeProduct();
+    return res;
+  };
+
   const queryProduct = useQuery({
     queryKey: ["products"],
     queryFn: getAllProduct,
   });
+  const typeProduct = useQuery({
+    queryKey: ["type-product"],
+    queryFn: fetchAllTypeProduct,
+  });
+  console.log("type", typeProduct);
+
   const { isPending: isLoadingProducts, data: products } = queryProduct;
 
   const dataTable = products?.data?.length
@@ -152,7 +166,16 @@ const AdminProduct = () => {
   }, [isSuccessUpdated]);
 
   const onFinish = () => {
-    mutation.mutate(stateProduct, {
+    const params ={
+     name: stateProduct?.name,
+    price: stateProduct?.price,
+    description: stateProduct?.description,
+    rating: stateProduct?.rating,
+    image: stateProduct?.image,
+    type: stateProduct?.type === 'add_type'? stateProduct.newType : stateProduct.type,
+    countInStock: stateProduct?.countInStock,
+  }
+    mutation.mutate(params, {
       onSettled: () => {
         queryProduct.refetch();
       },
@@ -447,6 +470,14 @@ const AdminProduct = () => {
     );
   };
 
+  const handleChangeSelect = (value) => {
+      setStateProduct({
+        ...stateProduct,
+        type: value,
+      });
+  };
+
+  console.log("typeVlue", stateProduct);
   return (
     <div>
       <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
@@ -529,12 +560,34 @@ const AdminProduct = () => {
                 },
               ]}
             >
-              <InputComponent
-                value={stateProduct.type}
-                onChange={handleOnchange}
+              <Select
                 name="type"
+                value={stateProduct.type}
+                onChange={handleChangeSelect}
+                options={renderOption(typeProduct?.data?.data)}
               />
             </Form.Item>
+            {stateProduct.type === "add_type" && (
+              <Form.Item
+                label="New Type"
+                name="newType"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input type!",
+                  },
+                ]}
+              >
+                  <div style={{ padding: "10px" }}>
+                    <InputComponent
+                      value={stateProduct.newType}
+                      onChange={handleOnchange}
+                      name= 'newType'
+                    />
+                  </div>
+              </Form.Item>
+            )}
+
             <Form.Item
               label="Count in Stock"
               name="countInStock"

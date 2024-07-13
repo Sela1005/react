@@ -1,14 +1,13 @@
-import OderPage from "../OrderPage/OrderPage";
+import OderPage from "../page/OrderPage/OrderPage.jsx";
 import ProductPage from "../ProductPage/ProductPage";
 import Home from "../page/HomePage/Home";
 import NotFoundPage from "../page/NotFoundPage/NotFoundPage";
-import TypeProductPage from "../page/TypeProductPage/TypeProductPage.jsx";
+import TypeProductPage from "../page/TypeProductPage/TypeProductPage";
 import SignInPage from "../page/SignInPage/SignInPage.jsx"
 import SignUpPage from "../page/SignUpPage/SignUpPage.jsx"
-import ProductDetails from "../page/ProductDetailsPage/ProductDetailsPage.jsx"
+import ProductDetails from "../page/ProductDetailsPage/ProductDetailsPage"
 import ProfilePage from "../page/Profile/ProfilePage.jsx";
 import AdminPage from "../page/AdminPage/AdminPage.jsx";
-import { TRUE } from "sass";
 export const routes = [
     {
         path: '/',
@@ -26,7 +25,7 @@ export const routes = [
         isShowHeader: true
     },
     {
-        path: '/:type',
+        path: '/product/:type',
         page: TypeProductPage,
         isShowHeader: true
     },
@@ -41,7 +40,7 @@ export const routes = [
         isShowHeader: true
     },
     {
-        path: '/product-details',
+        path: '/product-details/:id',
         page: ProductDetails,
         isShowHeader: true
     },

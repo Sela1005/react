@@ -17,7 +17,7 @@ import * as UserService from '../../services/UserService';
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import Loading from "../../component/LoadingComponent/Loading";
 import * as message from "../../component/Messages/Message";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {useDispatch} from "react-redux"
 import InputFormPassword from "../../component/InputForm/InputFormPassword";
@@ -26,6 +26,7 @@ import { updateUser } from "../../redux/slices/userSlide";
 const SignInPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation()
 
   const [position, setPosition] = useState("login");
   const [emailLogin, setEmailLogin] = useState('');
@@ -63,7 +64,11 @@ const SignInPage = () => {
     }
     else if (isLoginSuccess) {
       message.success("Đăng nhập thành công!")
-      navigate('/')
+       if(location?.state){
+        navigate(location?.state)
+      }else {
+        navigate('/')
+      }
       localStorage.setItem('access_token',JSON.stringify(loginData?.access_token))
       if(loginData?.access_token){
         const decoded = jwtDecode(loginData?.access_token)

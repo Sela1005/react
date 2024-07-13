@@ -15,7 +15,9 @@ export const WapperButtonMore = styled(ButtonComponent)`
         span{
             color: red;
         }
+        cursor: ${(props) => props.disabled ? 'not-allowed' : 'pointers'}
     }
+        
 `
 export const WapperProduct = styled.div`
     margin-top: 30px;

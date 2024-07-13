@@ -15,9 +15,7 @@ import ButtonInputSearch from "../ButtonInputSearch/ButtonInputSearch";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as UserService from "../../services/UserService";
-import {
-  resetUser,
-} from "../../redux/slices/userSlide";
+import { resetUser } from "../../redux/slices/userSlide";
 import Loading from "../LoadingComponent/Loading";
 import Logo from "../../image/logo_theWorldBook7.jpg";
 import { searchProduct } from "../../redux/slices/productSlide";
@@ -28,6 +26,7 @@ const HeaderComponent = () => {
   const [userAvatar, setUserAvatar] = useState("");
   const [loading, setloading] = useState(false);
   const [search, setSearch] = useState("");
+  const order = useSelector((state) => state.order)
 
   const dispatch = useDispatch();
 
@@ -161,7 +160,10 @@ const HeaderComponent = () => {
               </Popover>
             </Loading>
 
-            <WrapperHeaderCart>
+            <WrapperHeaderCart
+              onClick={() => navigate("/order")}
+              style={{ cursor: 'pointer'}}
+            >
               <Button
                 style={{
                   display: "flex",
@@ -174,7 +176,7 @@ const HeaderComponent = () => {
                 }}
                 type="text"
               >
-                <Badge count={2} size="small">
+                <Badge count={order?.orderItems?.length} size="small">
                   <ShoppingCartOutlined
                     style={{
                       fontSize: "30px",
