@@ -111,7 +111,7 @@ const Home = () => {
           />
         </div>
         <div>
-          <NavBarComponent />
+          {/* <NavBarComponent /> */}
         </div>
       </div>
     </Loading>

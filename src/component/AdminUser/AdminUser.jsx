@@ -167,6 +167,7 @@ const getAllUser = async () => {
           address: res?.data?.address,
           phone: res?.data?.phone,
           avatar: res?.data?.avatar,
+          city:res?.date?.city
         });
       }
       setIsLoadingUpdate(false);

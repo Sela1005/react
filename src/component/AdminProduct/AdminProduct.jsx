@@ -129,7 +129,6 @@ const AdminProduct = () => {
     queryKey: ["type-product"],
     queryFn: fetchAllTypeProduct,
   });
-  console.log("type", typeProduct);
 
   const { isPending: isLoadingProducts, data: products } = queryProduct;
 

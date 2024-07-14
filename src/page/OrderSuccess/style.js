@@ -14,8 +14,8 @@ export const WrapperStyleHeader = styled.div`
     }
 `
 
-export const WrapperLeft =styled.div`
-    width: 910px;
+export const WrapperContainer =styled.div`
+    width: 100%;
 `
 
 export const WrapperListOrder = styled.div`

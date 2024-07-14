@@ -1,27 +1,15 @@
-import { DeleteOutlined } from "@ant-design/icons";
-import { Checkbox, Form, InputNumber, message, Radio } from "antd";
+import { Form, message, Radio } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import ButtonComponent from "../../component/ButtonComponent/ButtonComponent";
 import {
   Lable,
-  WrapperCountOrder,
   WrapperInfo,
-  WrapperItemsOrder,
   WrapperLeft,
-  WrapperListOrder,
   WrapperRadio,
   WrapperRight,
-  WrapperStyleHeader,
   WrapperTotal,
 } from "./style";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  decreaseAmount,
-  increaseAmount,
-  removeAllOrderProduct,
-  removeOrderProduct,
-  selectedOrder,
-} from "../../redux/slices/orderSlide";
 import { convertPrice } from "../../utils";
 import ModalComponent from "../../component/ModalComponent/ModalComponent";
 import InputComponent from "../../component/InputConponent/InputConponent";
@@ -29,10 +17,12 @@ import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import Loading from "../../component/LoadingComponent/Loading";
 import * as OrderService from "../../services/OrderServices";
+import { useNavigate } from "react-router-dom";
+import { removeAllOrderProduct } from "../../redux/slices/orderSlide";
 
 
 const PaymentPage = () => {
-
+  const navigate = useNavigate()
   
   const order = useSelector((state) => state.order);
   const user = useSelector((state) => state.user);
@@ -130,13 +120,8 @@ const PaymentPage = () => {
           totalPrice: totalPriceMemo,
           user:user?.id
         }
-      ),{
-        onSuccess: () => {
-          message.success('Đặt hàng thành công')
-        }
-      }}
+      )}
     }
-    console.log('order', user, order)
     
     const mutationUpdate = useMutationHooks((data) => {
       const { id, token, ...rests } = data;
@@ -154,7 +139,20 @@ const PaymentPage = () => {
 
     useEffect(() => {
       if(isSuccess&& dataAdd?.status === 'OK'){
+        const arrayOrdered = []
+         order?.orderItemSelected?.forEach(element => {
+          arrayOrdered.push(element.product)
+         });
+        dispatch(removeAllOrderProduct({listChecked: arrayOrdered}))
         message.success('Đặt hàng thành công')
+        navigate('/orderSuccess',{
+          state:{
+            delivery,
+            payment,
+            orders: order?.orderItemSelected,
+            totalPriceMemo
+          }
+        })
       }else if(isError){
         message.error()
       }

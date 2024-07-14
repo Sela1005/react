@@ -56,7 +56,6 @@ export const orderSlide = createSlice({
 
         state.orderItems = itemOrder
         state.orderItemSelected = itemOrderSelected
-
       },
       removeAllOrderProduct: (state, action) => {
         const {listChecked} = action.payload
