@@ -38,9 +38,10 @@ const ProductDetailsComponent = ({ idProduct }) => {
 
   const location = useLocation();
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const user = useSelector((state) => state.user);
+  
 
   const fetchGetDetailsProduct = async (context) => {
     const id = context?.queryKey && context?.queryKey[1];
@@ -54,7 +55,6 @@ const ProductDetailsComponent = ({ idProduct }) => {
     setNumProduct(NumProduct);
   };
 
-  
   const renderStars = (num) => {
     const stars = [];
     for (let i = 0; i < num; i++) {
@@ -68,9 +68,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
     return stars;
   };
 
-  
-
-  const { isLoading, data: productDetails } = useQuery({
+  const { isPending, data: productDetails } = useQuery({
     queryKey: ["product-details", idProduct],
     queryFn: fetchGetDetailsProduct,
     enabled: !!idProduct,
@@ -78,34 +76,36 @@ const ProductDetailsComponent = ({ idProduct }) => {
 
   const handleAddOrderProduct = () => {
     if (!user?.id) {
-      navigate("/sign-in", {state: location?.pathname});
-    }else{
-        //   {
-        //     name: {type: String, required: true},
-        //     amount: { type: Number, required: true},
-        //     image: {type: String, required: true},
-        //     price: {type: Number, required: true},
-        //     product: {
-        //         type: mongoose.Schema.Types.ObjectId,
-        //         ref: 'Product',
-        //         required: true,
-        //     },
-        // },
-      dispatch(addOrderProduct({
-        orderItem: {
-          name: productDetails?.name,
-          amount: NumProduct,
-          image: productDetails?.image,
-          price: productDetails?.price,
-          product: productDetails?._id,
-        }
-      }))
+      navigate("/sign-in", { state: location?.pathname });
+    } else {
+      //   {
+      //     name: {type: String, required: true},
+      //     amount: { type: Number, required: true},
+      //     image: {type: String, required: true},
+      //     price: {type: Number, required: true},
+      //     product: {
+      //         type: mongoose.Schema.Types.ObjectId,
+      //         ref: 'Product',
+      //         required: true,
+      //     },
+      // },
+      dispatch(
+        addOrderProduct({
+          orderItem: {
+            name: productDetails?.name,
+            amount: NumProduct,
+            discount: productDetails?.discount,
+            image: productDetails?.image,
+            price: productDetails?.price,
+            product: productDetails?._id,
+          },
+        })
+      );
     }
   };
-  console.log('productDetails',productDetails, user)
 
   return (
-    <Loading isPending={isLoading}>
+    <Loading isPending={isPending}>
       <Row style={{ padding: "25px" }}>
         <Col span={10}>
           <WapperStyleImage
@@ -232,6 +232,7 @@ const ProductDetailsComponent = ({ idProduct }) => {
           </div>
         </Col>
       </Row>
+
     </Loading>
   );
 };

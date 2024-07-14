@@ -34,7 +34,6 @@ export const convertPrice = (price) => {
     try {
         const result = price?.toLocaleString().replaceAll(',','.')
         return `${result} VND`
-        return
     } catch (error) {
         return null
     }
