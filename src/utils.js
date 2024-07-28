@@ -1,3 +1,5 @@
+import { orderContant } from "./contant";
+
 export const isJsonString = (data) => {
     try{
         JSON.parse(data)
@@ -37,4 +39,28 @@ export const convertPrice = (price) => {
     } catch (error) {
         return null
     }
+}
+export const convertDataChart = (data, type) => {
+    try{
+        const object = {}
+        Array.isArray(data) && data.forEach((opt) => {
+            if(!object[opt[type]]){
+                object[opt[type]] = 1 
+            }else{
+                object[opt[type]]++
+            }
+
+        })
+        Object.keys(object)
+        const result =  Array.isArray(Object.keys(object)) && Object.keys(object).map((item) => {
+            return{
+                name: orderContant.payment[item],
+                value: object[item]
+            }
+        })
+        return result
+    }catch(e) {
+        return []
+    }
+   
 }

@@ -28,12 +28,13 @@ const CardComponent = (props) => {
     navigate(`/product-details/${id}`)
   }
   return (
+    //chua lam an san pham khi khong con san pham trong ton kho
     <Card
       hoverable
-      style={{ width: 240, padding: 10 }}
+      style={{ width: 240, padding: 10}}
       bodyStyle={{ padding: 10 }}
       cover={<img alt="example" src={image} />}
-      onClick={() => handleDetailsProduct(id)}
+      onClick={() =>  handleDetailsProduct(id)}
     >
       <StyleNameProduct>{name}</StyleNameProduct>
       <div style={{ display: "flex", alignItems: "center" }}>

@@ -13,10 +13,11 @@ import { useQuery } from "@tanstack/react-query";
 import * as message from "../../component/Messages/Message";
 import { getBase64 } from "../../utils";
 import * as UserService from '../../services/UserService';
+import { themeConstant } from "../../page/AdminPage/AdminPage";
 
 
 
-const AdminUser = () => {
+const AdminUser = ({ theme, setTheme }) => {
 
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
@@ -43,7 +44,8 @@ const AdminUser = () => {
     isAdmin: false,
     createdAt: '',
     avatar: '',
-    address: ''
+    address: '',
+    role: ''
   });
 
   const [form] = Form.useForm();
@@ -66,14 +68,9 @@ const mutationDelete = useMutationHooks(
 
 const getAllUser = async () => {
   const token = user?.access_token;
-  console.log('token',token)
   const res = await UserService.getAllUser(token);
-  console.log('res', res);
   return res;
 }
-
-  
-
 
   const { data:dataUpdated, isPending: isLoadingUpdated, isSuccess:isSuccessUpdated, isError:isErrorUpdated } = mutationUpdate
   const { data:dataDeleted, isPending: isLoadingDeleted, isSuccess:isSuccessDeleted, isError:isErrorDeleted } = mutationDelete
@@ -128,7 +125,8 @@ const getAllUser = async () => {
         isAdmin: false,
         createdAt: '',
         avatar: '',
-        address: ''
+        address: '',
+        role: '',
       })
     form.resetFields()
   };
@@ -158,7 +156,8 @@ const getAllUser = async () => {
 
   const fetchDetailsUSer = async (rowSelected) => {
     if (rowSelected) {
-      const res = await UserService.getDetailsUser(rowSelected);
+      const token = user?.access_token;
+      const res = await UserService.getDetailsUser(rowSelected,token);
       if (res?.data) {
         setStateUserDetails({
           name: res?.data?.name,
@@ -167,7 +166,8 @@ const getAllUser = async () => {
           address: res?.data?.address,
           phone: res?.data?.phone,
           avatar: res?.data?.avatar,
-          city:res?.date?.city
+          city:res?.data?.city,
+          role: res.data?.role
         });
       }
       setIsLoadingUpdate(false);
@@ -342,6 +342,11 @@ const getAllUser = async () => {
       ...getColumnSearchProps('address')
     },
     {
+      title: 'Role',
+      dataIndex: 'role',
+      sorter: (a,b) => a.role.length - b.role.length,
+    },
+    { 
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       sorter: (a,b) => a.createdAt - b.createdAt,
@@ -361,11 +366,13 @@ const getAllUser = async () => {
         }
       })
   }
+  // background: themeConstant[theme].background, 
   return (
     <div>
-      <WrapperHeader> Quản lý người dùng </WrapperHeader>
+      <WrapperHeader style={{color: themeConstant[theme].color }}> Quản lý người dùng </WrapperHeader>
       <div style={{ marginTop: "30px" }}>
         <TableComponent
+          borderColor={'red'}
           filename={"User"}
           headers={headers}
           columns={columns}
@@ -467,6 +474,21 @@ const getAllUser = async () => {
               />
             </Form.Item>
             <Form.Item
+              label="Role"
+              name="role"
+              rules={[
+                {
+                  required: false,
+                },
+              ]}
+            >
+              <InputComponent
+                value={stateUserDetails.role}
+                onChange={handleOnchangeDetails}
+                name="role"
+              />
+            </Form.Item>
+            <Form.Item
               label="IsAdmin"
               name="isAdmin"
               rules={[
@@ -535,13 +557,13 @@ const getAllUser = async () => {
 
       <ModalComponent
         forceRender
-        title="Xóa sản phẩm"
+        title="Xóa Người dùng"
         open={isModalOpenDelete}
         onCancel={handleCancelDelete}
         onOk={handleDeleteUser}
       >
         <Loading isPending={isLoadingDeleted}>
-          <div>Bạn có chắc xóa sản phẩm này không?</div>
+          <div>Bạn có muốn xóa người dùng này không</div>
         </Loading>
       </ModalComponent>
     </div>

@@ -41,8 +41,8 @@ const AdminProduct = () => {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
 
   const [typeSelect, setTypeSelect] = useState("");
-
-  const [stateProduct, setStateProduct] = useState({
+  
+  const inittial = () => ({
     name: "",
     price: "",
     description: "",
@@ -52,20 +52,13 @@ const AdminProduct = () => {
     countInStock: "",
     newType: "",
     discount: "",
-  });
+  })
+
+  const [stateProduct, setStateProduct] = useState(inittial());
 
   const user = useSelector((state) => state?.user);
 
-  const [stateProductDetails, setStateProductDetails] = useState({
-    name: "",
-    price: "",
-    description: "",
-    rating: "",
-    image: "",
-    type: "",
-    countInStock: "",
-    discount: "",
-  });
+  const [stateProductDetails, setStateProductDetails] = useState(inittial());
 
   const [form] = Form.useForm();
 
@@ -290,8 +283,12 @@ const AdminProduct = () => {
   };
 
   useEffect(() => {
-    form.setFieldsValue(stateProductDetails);
-  }, [form, stateProductDetails]);
+    if(!isModalOpen){
+      form.setFieldsValue(stateProductDetails);
+    }else{
+      form.setFieldsValue(inittial());
+    }
+  }, [form, stateProductDetails,isModalOpen]);
 
   useEffect(() => {
     if (rowSelected) {

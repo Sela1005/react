@@ -5,5 +5,6 @@ export const orderContant = {
     },
     payment: {
         later_money: 'Thanh toán bằng tiền mặt khi nhận hàng',
+        online: 'Thanh toán chuyển khoản',
     }
 }

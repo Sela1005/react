@@ -69,9 +69,13 @@ const HeaderComponent = () => {
       <WrapperContentPopup onClick={handleNavigateProfile}>
         Thông tin người dùng
       </WrapperContentPopup>
+      <WrapperContentPopup onClick={() => navigate('/my-order')}>
+        Đơn hàng của tôi
+      </WrapperContentPopup>
       <WrapperContentPopup onClick={handleLogout}>
         Đăng xuất
       </WrapperContentPopup>
+
     </div>
   );
 

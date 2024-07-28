@@ -30,7 +30,7 @@ import Loading from "../../component/LoadingComponent/Loading";
 import { useNavigate } from "react-router-dom";
 
 const OderPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [stateUserDetails, setStateUserDetails] = useState({
     name: "",
     phone: "",
@@ -64,13 +64,9 @@ const OderPage = () => {
 
   const priceDiscountMemo = useMemo(() => {
     const result = order?.orderItemSelected?.reduce((total, cur) => {
-      console.log("priceDiscountMemo", total, cur);
-      return total + cur.discount * cur.amount;
+      return  cur.discount
     }, 0);
-    if (Number(result)) {
-      return result;
-    }
-    return 0;
+    return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
   }, [order]);
 
   const diliveryPriceMemo = useMemo(() => {
@@ -82,13 +78,21 @@ const OderPage = () => {
       return 10000;
     }
   }, [priceMemo]);
+  
+  const priceDiscountBeforeMemo = useMemo(() => {
+    const result = order?.orderItemSelected?.reduce((total, cur) => {
+      return (priceMemo + diliveryPriceMemo) / cur.discount;
+    }, 0);
+    return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
+  }, [priceMemo, diliveryPriceMemo]);
 
   const totalPriceMemo = useMemo(() => {
-    // return priceMemo - priceDiscountMemo + diliveryPriceMemo
-    return (
-      priceMemo - (priceMemo * priceDiscountMemo) / 100 + diliveryPriceMemo
-    );
-  }, [priceMemo, priceDiscountMemo, diliveryPriceMemo]);
+    const result = order?.orderItemSelected?.reduce((total, cur) => {
+      return priceMemo + diliveryPriceMemo  - priceDiscountBeforeMemo
+    }, 0);
+    return result
+  }, [diliveryPriceMemo,priceDiscountBeforeMemo]);
+
 
   const onChange = (e) => {
     console.log(`checked = ${e.target.value}`);
@@ -137,7 +141,7 @@ const OderPage = () => {
 
   const handleChangeAddress = () => {
     setIsOpenModalUpdateInfo(true);
-  }
+  };
 
   const handleStep = (value, info, idProduct) => {
     if (info.type === "up") {
@@ -163,7 +167,7 @@ const OderPage = () => {
       setIsOpenModalUpdateInfo(true);
       message.warning("Vui lòng cập nhật thông tin giao hàng");
     } else {
-      navigate('/payment')
+      navigate("/payment");
     }
   };
   const handleCancelUpdate = () => {
@@ -317,9 +321,21 @@ const OderPage = () => {
             <div style={{ width: "100%" }}>
               <WrapperInfo>
                 <div>
-                  <span>Địa chỉ:  </span>
-                  <span style={{fontWeight:'bold'}}>{user?.address},{user?.city}</span>
-                  <span onClick={handleChangeAddress} style={{color: "#4588B5",fontWeight:'500', cursor:'pointer'}}> Thay đổi</span>
+                  <span>Địa chỉ: </span>
+                  <span style={{ fontWeight: "bold" }}>
+                    {user?.address},{user?.city}
+                  </span>
+                  <span
+                    onClick={handleChangeAddress}
+                    style={{
+                      color: "#4588B5",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {" "}
+                    Thay đổi
+                  </span>
                 </div>
               </WrapperInfo>
               <WrapperInfo>
@@ -376,6 +392,30 @@ const OderPage = () => {
                     }}
                   >
                     {convertPrice(diliveryPriceMemo)}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "red",
+                    }}
+                  >
+                    Đã giảm được
+                  </span>
+                  <span
+                    style={{
+                      color: "red",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {convertPrice(priceDiscountBeforeMemo)}
                   </span>
                 </div>
               </WrapperInfo>

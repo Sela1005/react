@@ -33,15 +33,15 @@ const NavBarComponent = () => {
     <div>
       <WapperLabelText>NHÓM SẢN PHẨM</WapperLabelText>
       <WapperContent>
-        {renderContent("text", ["Tieu thuyet", "Truyen ngan", "blabla"])}
+        {renderContent("text", [ "Thể loại"])}
       </WapperContent>
       <WapperContent>
         {renderContent("checkbox", [
-          { value: 'a', label: 'Drama' },
-          { value: 'b', label: 'Shounen' },
-          { value: 'c', label: 'Adventure' },
-          { value: 'd', label: 'Action' },
-          { value: 'e', label: 'Fantasy' }
+          { value: 'a', label: 'Kinh Tế' },
+          { value: 'b', label: 'Manga' },
+          { value: 'c', label: 'Thiếu Nhi' },
+          { value: 'd', label: 'Tâm lý' },
+          { value: 'e', label: 'Văn học' }
         ])}
       </WapperContent>
     </div>

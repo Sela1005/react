@@ -1,4 +1,4 @@
-import { Button, Table } from "antd";
+import { Button, ConfigProvider, Table } from "antd";
 import React, { useRef } from "react";
 import Loading from "../LoadingComponent/Loading";
 import { CSVLink } from "react-csv";
@@ -18,7 +18,8 @@ const TableComponent = (props) => {
       console.log(`selectedRowKeys: ${selectedRows}`);
     },
   };
-
+ 
+  
   return (
     <Loading isPending={isLoading}>
       <div style={{ padding: "10px" }}>

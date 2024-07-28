@@ -232,6 +232,9 @@ const PaymentPage = () => {
                   <Radio value='later_money'>
                     Thanh toán bằng tiền mặt khi nhận hàng
                   </Radio>
+                  <Radio value='online'>
+                    Thanh toán bằng chuyển khoản
+                  </Radio>
                 </WrapperRadio>
               </div>
             </WrapperInfo>

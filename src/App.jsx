@@ -26,7 +26,7 @@ const App = () => {
           handleGetDetailsUser(decoded?.id, storageData)
         }
     setIsLoading(false)
-  })
+  },[])
 
 
   

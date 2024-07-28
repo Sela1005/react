@@ -10,6 +10,7 @@ import ProfilePage from "../page/Profile/ProfilePage.jsx";
 import AdminPage from "../page/AdminPage/AdminPage.jsx";
 import PaymentPage from "../page/PaymentPage/PaymentPage.jsx";
 import OrderSuccess from "../page/OrderSuccess/OrderSucces.jsx";
+import MyOderPage from "../page/MyOrderPage/MyOrderPage.jsx";
 export const routes = [
     {
         path: '/',
@@ -19,6 +20,11 @@ export const routes = [
     {
         path: '/order',
         page: OderPage,
+        isShowHeader: true
+    },
+    {
+        path: '/my-order',
+        page: MyOderPage,
         isShowHeader: true
     },
     {
