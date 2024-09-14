@@ -1,21 +1,25 @@
-import { BookOutlined, SettingOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  BookOutlined,
+  SettingOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Layout, Menu, Switch } from "antd";
-import React, { useState,useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import AdminUser from "../../component/AdminUser/AdminUser";
 import AdminProduct from "../../component/AdminProduct/AdminProduct";
 import AdminOrder from "../../component/AdminOrder/AdminOrder";
 import { useSelector } from "react-redux";
 
-
 export const themeConstant = {
   light: {
-      background: '#ffffff',
-      color: '#000000',
+    background: "#ffffff",
+    color: "#000000",
   },
   dark: {
-      background: '#000000',
-      color: '#ffffff',
-  }
+    background: "#000000",
+    color: "#ffffff",
+  },
 };
 
 const AdminPage = () => {
@@ -35,7 +39,13 @@ const AdminPage = () => {
   const renderPage = (key) => {
     switch (key) {
       case "user":
-        return<AdminUser theme={theme} setTheme={setTheme} themeConstant={themeConstant} />;
+        return (
+          <AdminUser
+            theme={theme}
+            setTheme={setTheme}
+            themeConstant={themeConstant}
+          />
+        );
       case "product":
         return <AdminProduct />;
       case "order":
@@ -45,17 +55,15 @@ const AdminPage = () => {
     }
   };
   const items = useMemo(() => {
-    const baseItems = [
- 
-    ];
-    if (user?.role === 'NhanVienIT') {
+    const baseItems = [];
+    if (user?.role === "NhanVienIT") {
       baseItems.unshift({
         key: "user",
         label: "Người dùng",
         icon: <UserOutlined />,
       });
     }
-    if (user?.role === 'KeToan') {
+    if (user?.role === "KeToan") {
       baseItems.unshift({
         key: "order",
         label: "Đơn hàng",
@@ -63,11 +71,32 @@ const AdminPage = () => {
       });
     }
 
-    if (user?.role === 'ThuKho') {
+    if (user?.role === "ThuKho") {
       baseItems.unshift({
         key: "product",
         label: "Sản phẩm",
         icon: <BookOutlined />,
+      });
+    }
+    if (user?.role === "Phuc") {
+      baseItems.unshift({
+        key: "user",
+        label: "Người dùng",
+        icon: <UserOutlined />,
+      });
+    }
+    if (user?.role === "Phuc") {
+      baseItems.unshift({
+        key: "product",
+        label: "Sản phẩm",
+        icon: <BookOutlined />,
+      });
+    }
+    if (user?.role === "Phuc") {
+      baseItems.unshift({
+        key: "order",
+        label: "Đơn hàng",
+        icon: <ShoppingCartOutlined />,
       });
     }
 
@@ -102,7 +131,9 @@ const AdminPage = () => {
         unCheckedChildren="Light"
         style={{ position: "absolute", right: "20px", top: "20px" }}
       />
-      <div style={{ flex: 1, padding: "15px 0 15px 15px" }}>{renderPage(key)}</div>
+      <div style={{ flex: 1, padding: "15px 0 15px 15px" }}>
+        {renderPage(key)}
+      </div>
     </div>
   );
 };
