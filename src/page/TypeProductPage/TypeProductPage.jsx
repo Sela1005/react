@@ -3,7 +3,6 @@ import NavBarComponent from "../../component/NavBarComponent/NavBarComponent";
 import CardComponent from "../../component/CardComponent/CardComponent";
 import { Col, Pagination, Row } from "antd";
 import { WapperNavBar, WapperProduct } from "./style";
-import { useQuery } from "@tanstack/react-query";
 import * as ProductService from "../../services/ProductService";
 import { useLocation } from "react-router-dom";
 import Loading from "../../component/LoadingComponent/Loading";
@@ -78,7 +77,6 @@ const TypeProductPage = () => {
                   rating={product.rating}
                   type={product.type}
                   selled={product.selled}
-                  discount={product.discount}
                   id={product._id}
                 />
               );

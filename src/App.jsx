@@ -1,10 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { routes } from './routes';
-import HeaderComponent from './component/HeaderComponent/HeaderComponent';
 import DefaultComponent from './component/DefaultComponent/DefaultComponent';
-import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
 import { isJsonString } from './utils';
 import {jwtDecode}  from "jwt-decode";
 import * as UserService from './services/UserService';

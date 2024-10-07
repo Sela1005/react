@@ -1,10 +1,9 @@
 import {
   BookOutlined,
-  SettingOutlined,
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, Switch } from "antd";
+import { Menu, Switch } from "antd";
 import React, { useState, useMemo } from "react";
 import AdminUser from "../../component/AdminUser/AdminUser";
 import AdminProduct from "../../component/AdminProduct/AdminProduct";

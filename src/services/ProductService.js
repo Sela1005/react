@@ -16,7 +16,7 @@ export const getProductType = async (type) => {
         const res = await axios.get(`${import.meta.env.VITE_SERVER_HOST}/product/get-all?filter=type&filter=${type}`)
         return res.data
     }
-}
+}                                                                                                                                                                                                                                                                                   
 
 
 export const createProduct = async (data) => { 

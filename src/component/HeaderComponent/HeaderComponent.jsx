@@ -1,5 +1,5 @@
-import { Badge, Button, Col, Flex, Popover } from "antd";
-import React, { useEffect, useState } from "react";
+import { Badge, Button, Col, Popover } from "antd";
+import { useEffect, useState } from "react";
 import {
   WrapperContentPopup,
   WrapperHeader,
@@ -26,7 +26,7 @@ const HeaderComponent = () => {
   const [userAvatar, setUserAvatar] = useState("");
   const [loading, setloading] = useState(false);
   const [search, setSearch] = useState("");
-  const order = useSelector((state) => state.order)
+  const order = useSelector((state) => state.order);
 
   const dispatch = useDispatch();
 
@@ -69,13 +69,12 @@ const HeaderComponent = () => {
       <WrapperContentPopup onClick={handleNavigateProfile}>
         Thông tin người dùng
       </WrapperContentPopup>
-      <WrapperContentPopup onClick={() => navigate('/my-order')}>
+      <WrapperContentPopup onClick={() => navigate("/my-order")}>
         Đơn hàng của tôi
       </WrapperContentPopup>
       <WrapperContentPopup onClick={handleLogout}>
         Đăng xuất
       </WrapperContentPopup>
-
     </div>
   );
 
@@ -152,7 +151,12 @@ const HeaderComponent = () => {
                     )}
 
                     {user?.access_token ? (
-                      <div style={{ cursor: "pointer", padding: "5px" }}>
+                      <div
+                        style={{
+                          cursor: "pointer",
+                          padding: "5px",
+                        }}
+                      >
                         {userName?.length ? userName : user?.email}
                       </div>
                     ) : (
@@ -166,7 +170,7 @@ const HeaderComponent = () => {
 
             <WrapperHeaderCart
               onClick={() => navigate("/order")}
-              style={{ cursor: 'pointer'}}
+              style={{ cursor: "pointer" }}
             >
               <Button
                 style={{

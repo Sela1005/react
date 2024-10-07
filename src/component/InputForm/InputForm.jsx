@@ -1,5 +1,5 @@
 import React from 'react'
-import { WapperInputPassword, WapperInputStyle } from './style'
+import { WapperInputStyle } from './style'
 
 const InputForm = (props) => {
     const {placeholder = 'Nhập text', ...rests} = props

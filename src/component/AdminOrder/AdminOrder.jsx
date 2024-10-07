@@ -35,7 +35,6 @@ const AdminOrder = () => {
   const queryOrder = useQuery({ queryKey: ["orders"], queryFn: getAllOrder });
   const { isPending: isLoadingOrders, data: orders } = queryOrder;
 
-
   const headers = [
     { label: "Tên Người dùng", key: "userName" },
     { label: "Số điện thoại", key: "phone" },
@@ -45,9 +44,6 @@ const AdminOrder = () => {
     { label: "Phương thức thanh toán", key: "paymentMethod" },
     { label: "Đơn giá", key: "price" },
     { label: "Tổng tiền", key: "totalPrice" },
-    
-
-
   ];
 
   const columns = [
@@ -86,7 +82,6 @@ const AdminOrder = () => {
       dataIndex: "totalPrice",
       sorter: (a, b) => a.totalPrice - b.totalPrice,
     },
-    
   ];
   const dataTable = orders?.data.length
     ? orders.data.map((order) => {
@@ -106,8 +101,8 @@ const AdminOrder = () => {
   return (
     <div>
       <WrapperHeader> Quản lý đơn hàng </WrapperHeader>
-      <div style={{height: 180, width: 200}}>
-      <PieChartComponent data={orders?.data}/>
+      <div style={{ height: 180, width: 200 }}>
+        <PieChartComponent data={orders?.data} />
       </div>
       <div style={{ marginTop: "30px" }}>
         <TableComponent

@@ -17,16 +17,16 @@ import { orderContant } from "../../contant";
 
 const OrderSuccess = () => {
   const order = useSelector((state) => state.order);
-  const location = useLocation()
-  console.log('location', location)
+  const location = useLocation();
+  console.log("location", location);
 
-  const {state} = location
+  const { state } = location;
 
   return (
     <Loading isPending={false}>
-      <div style={{ background: "#f5f5fa", width: "100%", height: "100vh" }}>
+      <div style={{ background: "#f5f5fa", width: "100%", height: "1000px" }}>
         <div style={{ height: "100%", width: "1270px", margin: "0 auto" }}>
-          <h3
+          <h1
             style={{
               display: "flex",
               alignItems: "center",
@@ -34,8 +34,8 @@ const OrderSuccess = () => {
               padding: "10px",
             }}
           >
-            ĐƠN HÀNG ĐÃ ĐƯỢC ĐẶT THÀNH CÔNG
-          </h3>
+            ĐƠN HÀNG CỦA BẠN ĐÃ ĐƯỢC ĐẶT THÀNH CÔNG
+          </h1>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <WrapperContainer>
               <WrapperInfo>
@@ -57,79 +57,90 @@ const OrderSuccess = () => {
                   </div>
                 </div>
               </WrapperInfo>
-              <WrapperInfo style={{border: '2px solid #4588B5'}}>
-                <span style={{color:'red', fontWeight:'700', display: 'flex', justifyContent: 'center', alignContent:'center', paddingTop: '20px'}}>Chi tiết đơn hàng</span>
-                {state.orders?.map((order)=>{
-                  return(
+              <WrapperInfo style={{ border: "2px solid #4588B5" }}>
+                <span
+                  style={{
+                    color: "red",
+                    fontWeight: "700",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignContent: "center",
+                    paddingTop: "20px",
+                    fontSize: "25px",
+                  }}
+                >
+                  Chi tiết đơn hàng
+                </span>
+                {state.orders?.map((order) => {
+                  return (
                     <WrapperItemsOrder>
-                    <div
-                      style={{
-                        width: "390px",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        src={order?.image}
-                        style={{
-                          width: "77px",
-                          height: "79px",
-                          objectFit: "cover",
-                        }}
-                      />
                       <div
                         style={{
-                          padding: "10px",
-                          fontSize: "15px",
-                          fontWeight: "500",
+                          width: "390px",
+                          display: "flex",
+                          alignItems: "center",
                         }}
                       >
-                        {order?.name}
+                        <img
+                          src={order?.image}
+                          style={{
+                            width: "77px",
+                            height: "79px",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <div
+                          style={{
+                            padding: "10px",
+                            fontSize: "15px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {order?.name}
+                        </div>
                       </div>
-                    </div>
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>
-                        <span style={{ fontSize: "13px", color: "#242424" }}>
-                          Đơn giá: {convertPrice(order?.price)}
-                        </span>
-                      </span>
-                      <span >
-                        <span>
-                        Số lượng: 
-                        </span>
-                        <span> {order?.amount}</span>
-                      </span>
-                      <span
+                      <div
                         style={{
-                          fontSize: "13px",
-                          color: "red",
-                          fontWeight: 500,
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        {convertPrice(order?.price * order?.amount)}
-                      </span>
-                    </div>
-                  </WrapperItemsOrder>
-                  )
+                        <span>
+                          <span style={{ fontSize: "13px", color: "#242424" }}>
+                            Đơn giá: {convertPrice(order?.price)}
+                          </span>
+                        </span>
+                        <span>
+                          <span>Số lượng:</span>
+                          <span> {order?.amount}</span>
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "red",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {convertPrice(order?.price * order?.amount)}
+                        </span>
+                      </div>
+                    </WrapperItemsOrder>
+                  );
                 })}
               </WrapperInfo>
-              <div>
-              <span style={{
-                          fontSize: "20px",
-                          color: "red",
-                          fontWeight: 700,
-                        }}>
-              Tổng tiền: {convertPrice(state?.totalPriceMemo)}
-              </span>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <span
+                  style={{
+                    fontSize: "20px",
+                    color: "red",
+                    fontWeight: 700,
+                  }}
+                >
+                  Tổng tiền: {convertPrice(state?.totalPriceMemo)}
+                </span>
               </div>
-              
             </WrapperContainer>
           </div>
         </div>

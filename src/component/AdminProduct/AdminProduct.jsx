@@ -10,12 +10,12 @@ import {
 } from "@ant-design/icons";
 import TableComponent from "../TableComponent/TableComponent";
 import InputComponent from "../InputConponent/InputConponent";
-import { getBase64, renderOption } from "../../utils";
+import { convertPrice, getBase64, renderOption } from "../../utils";
 import { WapperUploadFile } from "./style";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import * as ProductService from "../../services/ProductService";
 import Loading from "../LoadingComponent/Loading";
-import * as message from "../../component/Messages/Message";
+import * as message from "../Messages/Message";
 import { useQuery } from "@tanstack/react-query";
 import DrawerComponent from "../DrawerComponent/DrawerComponent";
 import { useSelector } from "react-redux";
@@ -41,7 +41,7 @@ const AdminProduct = () => {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
 
   const [typeSelect, setTypeSelect] = useState("");
-  
+
   const inittial = () => ({
     name: "",
     price: "",
@@ -51,8 +51,7 @@ const AdminProduct = () => {
     type: "",
     countInStock: "",
     newType: "",
-    discount: "",
-  })
+  });
 
   const [stateProduct, setStateProduct] = useState(inittial());
 
@@ -63,8 +62,15 @@ const AdminProduct = () => {
   const [form] = Form.useForm();
 
   const mutation = useMutationHooks((data) => {
-    const { name, price, description, rating, image, type, countInStock,discount } =
-      data;
+    const {
+      name,
+      price,
+      description,
+      rating,
+      image,
+      type,
+      countInStock,
+    } = data;
     const res = ProductService.createProduct({
       name,
       price,
@@ -73,7 +79,6 @@ const AdminProduct = () => {
       image,
       type,
       countInStock,
-      discount
     });
     return res;
   });
@@ -91,7 +96,7 @@ const AdminProduct = () => {
   });
 
   const getAllProduct = async () => {
-    const res = await ProductService.getAllProduct('', 100);
+    const res = await ProductService.getAllProduct("", 100);
     return res;
   };
 
@@ -131,7 +136,6 @@ const AdminProduct = () => {
         key: product._id,
       }))
     : [];
-
   useEffect(() => {
     if (isSuccess && data?.status === "OK") {
       message.success("Thêm sản phẩm thành công!!");
@@ -161,16 +165,18 @@ const AdminProduct = () => {
   }, [isSuccessUpdated]);
 
   const onFinish = () => {
-    const params ={
-     name: stateProduct?.name,
-    price: stateProduct?.price,
-    description: stateProduct?.description,
-    rating: stateProduct?.rating,
-    image: stateProduct?.image,
-    type: stateProduct?.type === 'add_type'? stateProduct.newType : stateProduct.type,
-    countInStock: stateProduct?.countInStock,
-    discount: stateProduct?.discount
-  }
+    const params = {
+      name: stateProduct?.name,
+      price: stateProduct?.price,
+      description: stateProduct?.description,
+      rating: stateProduct?.rating,
+      image: stateProduct?.image,
+      type:
+        stateProduct?.type === "add_type"
+          ? stateProduct.newType
+          : stateProduct.type,
+      countInStock: stateProduct?.countInStock
+    };
     mutation.mutate(params, {
       onSettled: () => {
         queryProduct.refetch();
@@ -201,7 +207,6 @@ const AdminProduct = () => {
       image: "",
       type: "",
       countInStock: "",
-      discount: ""
     });
     form.resetFields();
   };
@@ -215,7 +220,6 @@ const AdminProduct = () => {
       image: "",
       type: "",
       countInStock: "",
-      discount: ""
     });
     form.resetFields();
   };
@@ -275,7 +279,6 @@ const AdminProduct = () => {
           image: res?.data?.image,
           type: res?.data?.type,
           countInStock: res?.data?.countInStock,
-          discount: res?.data?.discount
         });
       }
       setIsLoadingUpdate(false);
@@ -283,12 +286,12 @@ const AdminProduct = () => {
   };
 
   useEffect(() => {
-    if(!isModalOpen){
+    if (!isModalOpen) {
       form.setFieldsValue(stateProductDetails);
-    }else{
+    } else {
       form.setFieldsValue(inittial());
     }
-  }, [form, stateProductDetails,isModalOpen]);
+  }, [form, stateProductDetails, isModalOpen]);
 
   useEffect(() => {
     if (rowSelected) {
@@ -305,7 +308,6 @@ const AdminProduct = () => {
     { label: "Price", key: "price" },
     { label: "Rating", key: "rating" },
     { label: "Type", key: "type" },
-    { label: "Discount", key: "discount" },
   ];
 
   const renderAction = () => {
@@ -458,11 +460,6 @@ const AdminProduct = () => {
       ...getColumnSearchProps("type"),
     },
     {
-      title: "Discount",
-      dataIndex: "discount",
-      ...getColumnSearchProps("discount"),
-    },
-    {
       title: "Action",
       dataIndex: "action",
       render: renderAction,
@@ -480,10 +477,10 @@ const AdminProduct = () => {
   };
 
   const handleChangeSelect = (value) => {
-      setStateProduct({
-        ...stateProduct,
-        type: value,
-      });
+    setStateProduct({
+      ...stateProduct,
+      type: value,
+    });
   };
 
   console.log("typeVlue", stateProduct);
@@ -587,13 +584,13 @@ const AdminProduct = () => {
                   },
                 ]}
               >
-                  <div style={{ padding: "10px" }}>
-                    <InputComponent
-                      value={stateProduct.newType}
-                      onChange={handleOnchange}
-                      name= 'newType'
-                    />
-                  </div>
+                <div style={{ padding: "10px" }}>
+                  <InputComponent
+                    value={stateProduct.newType}
+                    onChange={handleOnchange}
+                    name="newType"
+                  />
+                </div>
               </Form.Item>
             )}
 
@@ -661,22 +658,7 @@ const AdminProduct = () => {
                 name="rating"
               />
             </Form.Item>
-            <Form.Item
-              label="Discount"
-              name="discount"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input discount!",
-                },
-              ]}
-            >
-              <InputComponent
-                value={stateProduct.discount}
-                onChange={handleOnchange}
-                name="discount"
-              />
-            </Form.Item>
+
 
             <Form.Item
               label="Image"
@@ -843,22 +825,6 @@ const AdminProduct = () => {
                 value={stateProductDetails.rating}
                 onChange={handleOnchangeDetails}
                 name="rating"
-              />
-            </Form.Item>
-            <Form.Item
-              label="Discount"
-              name="discount"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input discount!",
-                },
-              ]}
-            >
-              <InputComponent
-                value={stateProductDetails.discount}
-                onChange={handleOnchangeDetails}
-                name="discount"
               />
             </Form.Item>
 

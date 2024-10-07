@@ -18,8 +18,7 @@ const TableComponent = (props) => {
       console.log(`selectedRowKeys: ${selectedRows}`);
     },
   };
- 
-  
+
   return (
     <Loading isPending={isLoading}>
       <div style={{ padding: "10px" }}>

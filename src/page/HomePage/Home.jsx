@@ -8,7 +8,6 @@ import slide3 from "../../image/slide3.jpg";
 import slide4 from "../../image/slide4.jpg";
 import slide5 from "../../image/slide5.jpg";
 import CardComponent from "../../component/CardComponent/CardComponent";
-import NavBarComponent from "../../component/NavBarComponent/NavBarComponent";
 import { useQuery } from "@tanstack/react-query";
 import * as ProductService from "../../services/ProductService";
 import { useSelector } from "react-redux";
@@ -23,7 +22,6 @@ const Home = () => {
   const [typeProducts, setTypeProducts] = useState([]);
 
   const fetchProductAll = async (context) => {
-    console.log("context", context);
     const limit = context?.queryKey && context?.queryKey[1];
     const search = context?.queryKey && context?.queryKey[2];
     const res = await ProductService.getAllProduct(search, limit);
@@ -88,7 +86,6 @@ const Home = () => {
                 rating={product.rating}
                 type={product.type}
                 selled={product.selled}
-                discount={product.discount}
                 id={product._id}
               />
             );

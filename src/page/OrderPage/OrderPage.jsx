@@ -37,6 +37,8 @@ const OderPage = () => {
     address: "",
     city: "",
   });
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
 
   const mutationUpdate = useMutationHooks((data) => {
     const { id, token, ...rests } = data;
@@ -62,37 +64,40 @@ const OderPage = () => {
     return result;
   }, [order]);
 
-  const priceDiscountMemo = useMemo(() => {
-    const result = order?.orderItemSelected?.reduce((total, cur) => {
-      return  cur.discount
-    }, 0);
-    return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
-  }, [order]);
+  // const priceDiscountMemo = useMemo(() => {
+  //   const result = order?.orderItemSelected?.reduce((total, cur) => {
+  //     return  cur.discount
+  //   }, 0);
+  //   return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
+  // }, [order]);
 
   const diliveryPriceMemo = useMemo(() => {
-    if (priceMemo > 100000) {
-      return 20000;
+    if (priceMemo > 10000000) {
+      return 30000;
     } else if (priceMemo === 0) {
       return 0;
     } else {
       return 10000;
     }
   }, [priceMemo]);
-  
-  const priceDiscountBeforeMemo = useMemo(() => {
-    const result = order?.orderItemSelected?.reduce((total, cur) => {
-      return (priceMemo + diliveryPriceMemo) / cur.discount;
-    }, 0);
-    return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
-  }, [priceMemo, diliveryPriceMemo]);
 
   const totalPriceMemo = useMemo(() => {
-    const result = order?.orderItemSelected?.reduce((total, cur) => {
-      return priceMemo + diliveryPriceMemo  - priceDiscountBeforeMemo
-    }, 0);
-    return result
-  }, [diliveryPriceMemo,priceDiscountBeforeMemo]);
+    const result =
+      order?.orderItemSelected?.reduce((total, cur) => {
+        const price = cur.price || 0; // Đảm bảo giá là số
+        const amount = cur.amount || 0; // Đảm bảo số lượng là số
+        return total + price * amount;
+      }, 0) || 0; // Đảm bảo không bị NaN
 
+    return result + diliveryPriceMemo || 0; // Tính tổng giá thành
+  }, [order?.orderItemSelected, diliveryPriceMemo]); // Thêm order vào mảng phụ thuộc
+
+  // const priceDiscountBeforeMemo = useMemo(() => {
+  //   const result = order?.orderItemSelected?.reduce((total, cur) => {
+  //     return (priceMemo + diliveryPriceMemo) / cur.discount;
+  //   }, 0);
+  //   return result || 0; // Đảm bảo trả về 0 nếu không có kết quả
+  // }, [priceMemo, diliveryPriceMemo]);
 
   const onChange = (e) => {
     console.log(`checked = ${e.target.value}`);
@@ -131,7 +136,7 @@ const OderPage = () => {
       setStateUserDetails({
         city: user?.city,
         name: user?.name,
-        address: user?.addres,
+        address: user?.address,
         phone: user?.phone,
       });
     }
@@ -182,19 +187,30 @@ const OderPage = () => {
   };
 
   const handleUpdateInfoUser = () => {
-    console.log("stateUserDetails", stateUserDetails);
     const { name, address, city, phone } = stateUserDetails;
     if (name && address && city && phone) {
       mutationUpdate.mutate(
         { id: user?.id, token: user?.access_token, ...stateUserDetails },
         {
           onSuccess: () => {
+            // Refresh user details from Redux store
+            setStateUserDetails({
+              city: user?.city,
+              name: user?.name,
+              address: user?.address,
+              phone: user?.phone,
+            });
             setIsOpenModalUpdateInfo(false);
           },
         }
       );
     }
   };
+
+  useEffect(() => {
+    setAddress(user?.address);
+    setCity(user?.city);
+  }, [user?.address, user?.city]);
 
   const handleOnchangeDetails = (e) => {
     setStateUserDetails({
@@ -285,8 +301,8 @@ const OderPage = () => {
                       </span>
                       <WrapperCountOrder>
                         {/* <WrapperPriceDiscount>
-                            {order?.amount}
-                          </WrapperPriceDiscount> */}
+                              {order?.amount}
+                            </WrapperPriceDiscount> */}
                         <InputNumber
                           defaultValue={1}
                           min={1}
@@ -322,9 +338,7 @@ const OderPage = () => {
               <WrapperInfo>
                 <div>
                   <span>Địa chỉ: </span>
-                  <span style={{ fontWeight: "bold" }}>
-                    {user?.address},{user?.city}
-                  </span>
+                  <span style={{ fontWeight: "bold" }}>{address}, {city}</span>
                   <span
                     onClick={handleChangeAddress}
                     style={{
@@ -373,7 +387,7 @@ const OderPage = () => {
                       fontWeight: "600",
                     }}
                   >
-                    {`${priceDiscountMemo} %`}
+                    {/* {`${priceDiscountMemo} %`} */}
                   </span>
                 </div>
                 <div
@@ -415,7 +429,7 @@ const OderPage = () => {
                       fontWeight: "600",
                     }}
                   >
-                    {convertPrice(priceDiscountBeforeMemo)}
+                    {/* {convertPrice(priceDiscountBeforeMemo)} */}
                   </span>
                 </div>
               </WrapperInfo>

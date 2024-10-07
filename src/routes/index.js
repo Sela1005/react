@@ -4,7 +4,6 @@ import Home from "../page/HomePage/Home";
 import NotFoundPage from "../page/NotFoundPage/NotFoundPage";
 import TypeProductPage from "../page/TypeProductPage/TypeProductPage";
 import SignInPage from "../page/SignInPage/SignInPage.jsx"
-import SignUpPage from "../page/SignUpPage/SignUpPage.jsx"
 import ProductDetails from "../page/ProductDetailsPage/ProductDetailsPage"
 import ProfilePage from "../page/Profile/ProfilePage.jsx";
 import AdminPage from "../page/AdminPage/AdminPage.jsx";
@@ -50,11 +49,6 @@ export const routes = [
     {
         path: '/sign-in',
         page: SignInPage,
-        isShowHeader: true
-    },
-    {
-        path: '/sign-up',
-        page: SignUpPage,
         isShowHeader: true
     },
     {

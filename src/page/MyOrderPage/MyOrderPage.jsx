@@ -24,7 +24,6 @@ const MyOrderPage = () => {
   const columns = [
     { title: "Tên sản phẩm", dataIndex: "name",},
     { title: "Số lượng", dataIndex: "amount" },
-    { title: "Giảm giá", dataIndex: "discount" },
     { title: "Giá", dataIndex: "price", },
 
 
