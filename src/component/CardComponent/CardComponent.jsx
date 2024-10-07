@@ -50,7 +50,7 @@ const CardComponent = (props) => {
           />
         </span>
         <span>
-          <span style={{ marginLeft: "2px" }}> | Đã bán {selled || 1000}+</span>
+          <span style={{ marginLeft: "2px" }}> | Đã bán {selled || 0}</span>
         </span>
       </WapperReportText>
     </Card>
