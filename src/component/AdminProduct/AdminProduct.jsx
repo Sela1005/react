@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { WrapperHeader } from "./style";
-import { Button, Form, Modal, Select, Space, Upload } from "antd";
+import { Button, Form, Input, Select, Space } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -15,15 +15,11 @@ import { WapperUploadFile } from "./style";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import * as ProductService from "../../services/ProductService";
 import Loading from "../LoadingComponent/Loading";
-import * as message from "../Messages/Message";
+import * as message from "../../component/Messages/Message";
 import { useQuery } from "@tanstack/react-query";
 import DrawerComponent from "../DrawerComponent/DrawerComponent";
 import { useSelector } from "react-redux";
 import ModalComponent from "../ModalComponent/ModalComponent";
-import {
-  DownloadTableExcel,
-  useDownloadExcel,
-} from "react-export-table-to-excel";
 
 const AdminProduct = () => {
   const [searchText, setSearchText] = useState("");
@@ -41,15 +37,17 @@ const AdminProduct = () => {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
 
   const [typeSelect, setTypeSelect] = useState("");
+  
+  const {TextArea} = Input;
 
   const inittial = () => ({
     name: "",
-    price: "",
-    description: "",
-    rating: "",
     image: "",
     type: "",
+    price: "",
     countInStock: "",
+    rating: "",
+    description: "",
     newType: "",
   });
 
@@ -62,27 +60,19 @@ const AdminProduct = () => {
   const [form] = Form.useForm();
 
   const mutation = useMutationHooks((data) => {
-    const {
-      name,
-      price,
-      description,
-      rating,
-      image,
-      type,
-      countInStock,
-    } = data;
+    const { name, image, type, price, countInStock, rating, description } =
+      data;
     const res = ProductService.createProduct({
       name,
-      price,
-      description,
-      rating,
       image,
       type,
+      price,
       countInStock,
+      rating,
+      description,
     });
     return res;
   });
-
   const mutationUpdate = useMutationHooks((data) => {
     const { id, token, ...rests } = data;
     const res = ProductService.updateProduct(id, token, { ...rests });
@@ -96,7 +86,8 @@ const AdminProduct = () => {
   });
 
   const getAllProduct = async () => {
-    const res = await ProductService.getAllProduct("", 100);
+    const res = await ProductService.getAllProduct("", 1000);
+    console.log("res", res);
     return res;
   };
 
@@ -134,8 +125,10 @@ const AdminProduct = () => {
     ? products.data.map((product) => ({
         ...product,
         key: product._id,
+        price: convertPrice(product.price),
       }))
     : [];
+
   useEffect(() => {
     if (isSuccess && data?.status === "OK") {
       message.success("Thêm sản phẩm thành công!!");
@@ -167,15 +160,15 @@ const AdminProduct = () => {
   const onFinish = () => {
     const params = {
       name: stateProduct?.name,
-      price: stateProduct?.price,
-      description: stateProduct?.description,
-      rating: stateProduct?.rating,
       image: stateProduct?.image,
+      price: stateProduct?.price,
+      countInStock: stateProduct?.countInStock,
       type:
         stateProduct?.type === "add_type"
           ? stateProduct.newType
           : stateProduct.type,
-      countInStock: stateProduct?.countInStock
+      rating: stateProduct?.rating,
+      description: stateProduct?.description,
     };
     mutation.mutate(params, {
       onSettled: () => {
@@ -201,12 +194,13 @@ const AdminProduct = () => {
     setIsModalOpen(false);
     setStateProduct({
       name: "",
-      price: "",
-      description: "",
-      rating: "",
       image: "",
       type: "",
+      price: "",
       countInStock: "",
+      rating: "",
+      description: "",
+      newType: "",
     });
     form.resetFields();
   };
@@ -214,12 +208,13 @@ const AdminProduct = () => {
     setIsOpenDrawer(false);
     setStateProductDetails({
       name: "",
-      price: "",
-      description: "",
-      rating: "",
       image: "",
       type: "",
+      price: "",
       countInStock: "",
+      rating: "",
+      description: "",
+      newType: "",
     });
     form.resetFields();
   };
@@ -273,12 +268,12 @@ const AdminProduct = () => {
       if (res?.data) {
         setStateProductDetails({
           name: res?.data?.name,
-          price: res?.data?.price,
-          description: res?.data?.description,
-          rating: res?.data?.rating,
           image: res?.data?.image,
           type: res?.data?.type,
+          price: res?.data?.price,
           countInStock: res?.data?.countInStock,
+          rating: res?.data?.rating,
+          description: res?.data?.description,
         });
       }
       setIsLoadingUpdate(false);
@@ -439,28 +434,28 @@ const AdminProduct = () => {
 
   const columns = [
     {
-      title: "Name",
+      title: "Tên sản phẩm",
       dataIndex: "name",
       sorter: (a, b) => a.name.length - b.name.length,
       ...getColumnSearchProps("name"),
     },
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
-      sorter: (a, b) => a.price - b.price,
+      sorter: (a, b) => parseFloat(a.price) - parseFloat(b.price),
     },
     {
-      title: "Rating",
+      title: "Đánh giá",
       dataIndex: "rating",
       sorter: (a, b) => a.rating - b.rating,
     },
     {
-      title: "Type",
+      title: "Thể loại",
       dataIndex: "type",
       ...getColumnSearchProps("type"),
     },
     {
-      title: "Action",
+      title: "Hành động",
       dataIndex: "action",
       render: renderAction,
     },
@@ -483,7 +478,6 @@ const AdminProduct = () => {
     });
   };
 
-  console.log("typeVlue", stateProduct);
   return (
     <div>
       <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
@@ -534,13 +528,14 @@ const AdminProduct = () => {
             }}
             style={{
               maxWidth: 600,
+              paddingTop: "20px",
             }}
             onFinish={onFinish}
             autoComplete="off"
             form={form}
           >
             <Form.Item
-              label="Name"
+              label="Tên sản phẩm"
               name="name"
               rules={[
                 {
@@ -557,7 +552,7 @@ const AdminProduct = () => {
             </Form.Item>
 
             <Form.Item
-              label="Type"
+              label="Loại sản phẩm:"
               name="type"
               rules={[
                 {
@@ -575,7 +570,7 @@ const AdminProduct = () => {
             </Form.Item>
             {stateProduct.type === "add_type" && (
               <Form.Item
-                label="New Type"
+                label="Hãng mới:"
                 name="newType"
                 rules={[
                   {
@@ -595,7 +590,7 @@ const AdminProduct = () => {
             )}
 
             <Form.Item
-              label="Count in Stock"
+              label="Số lượng tồn kho: "
               name="countInStock"
               rules={[
                 {
@@ -611,7 +606,7 @@ const AdminProduct = () => {
               />
             </Form.Item>
             <Form.Item
-              label="Price"
+              label="Giá:"
               name="price"
               rules={[
                 {
@@ -627,7 +622,7 @@ const AdminProduct = () => {
               />
             </Form.Item>
             <Form.Item
-              label="Description"
+              label="Chi tiết"
               name="description"
               rules={[
                 {
@@ -636,14 +631,14 @@ const AdminProduct = () => {
                 },
               ]}
             >
-              <InputComponent
+              <TextArea
                 value={stateProduct.description}
                 onChange={handleOnchange}
                 name="description"
               />
             </Form.Item>
             <Form.Item
-              label="Rating"
+              label="Đánh giá:"
               name="rating"
               rules={[
                 {
@@ -659,9 +654,8 @@ const AdminProduct = () => {
               />
             </Form.Item>
 
-
             <Form.Item
-              label="Image"
+              label="Hình ảnh:"
               name="image"
               rules={[
                 {
@@ -709,7 +703,7 @@ const AdminProduct = () => {
         </Loading>
       </ModalComponent>
       <DrawerComponent
-        title="Chi tiết sản phẩm"
+        title={<span style={{ paddingBottom: "20px" }}>Chi tiết sản phẩm</span>} // Thêm padding cho tiêu đề
         isOpen={isOpenDrawer}
         onClose={() => setIsOpenDrawer(false)}
         width="50%"
@@ -718,20 +712,21 @@ const AdminProduct = () => {
           <Form
             name="basic"
             labelCol={{
-              span: 2,
+              span: 6, // Điều chỉnh labelCol và wrapperCol như ModalComponent
             }}
             wrapperCol={{
-              span: 22,
+              span: 18,
             }}
             style={{
               maxWidth: 600,
+              paddingTop: "20px", // Thêm khoảng cách phía trên form như Modal
             }}
             onFinish={onUpdateProduct}
             autoComplete="off"
             form={form}
           >
             <Form.Item
-              label="Name"
+              label="Tên sản phẩm:"
               name="name"
               rules={[
                 {
@@ -748,7 +743,7 @@ const AdminProduct = () => {
             </Form.Item>
 
             <Form.Item
-              label="Type"
+              label="Loại sản phẩm:"
               name="type"
               rules={[
                 {
@@ -763,8 +758,9 @@ const AdminProduct = () => {
                 name="type"
               />
             </Form.Item>
+
             <Form.Item
-              label="Count in Stock"
+              label="Số lượng còn lại: "
               name="countInStock"
               rules={[
                 {
@@ -779,8 +775,9 @@ const AdminProduct = () => {
                 name="countInStock"
               />
             </Form.Item>
+
             <Form.Item
-              label="Price"
+              label="Giá:"
               name="price"
               rules={[
                 {
@@ -795,8 +792,9 @@ const AdminProduct = () => {
                 name="price"
               />
             </Form.Item>
+
             <Form.Item
-              label="Description"
+              label="Chi tiết:"
               name="description"
               rules={[
                 {
@@ -805,19 +803,20 @@ const AdminProduct = () => {
                 },
               ]}
             >
-              <InputComponent
+              <TextArea
                 value={stateProductDetails.description}
                 onChange={handleOnchangeDetails}
                 name="description"
               />
             </Form.Item>
+
             <Form.Item
-              label="Rating"
+              label="Đánh giá:"
               name="rating"
               rules={[
                 {
                   required: true,
-                  message: "Please input type!",
+                  message: "Please input rating!",
                 },
               ]}
             >
@@ -829,7 +828,7 @@ const AdminProduct = () => {
             </Form.Item>
 
             <Form.Item
-              label="Image"
+              label="Hình ảnh:"
               name="image"
               rules={[
                 {
@@ -873,7 +872,7 @@ const AdminProduct = () => {
               </div>
 
               <Button type="primary" htmlType="submit">
-                Apply
+                Xác nhận
               </Button>
             </Form.Item>
           </Form>

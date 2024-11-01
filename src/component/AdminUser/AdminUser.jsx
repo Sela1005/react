@@ -4,7 +4,6 @@ import { Button, Form, Space } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
-  PlusSquareTwoTone,
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -16,7 +15,7 @@ import ModalComponent from "../ModalComponent/ModalComponent";
 import { useSelector } from "react-redux";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import { useQuery } from "@tanstack/react-query";
-import * as message from "../Messages/Message";
+import * as message from "../../component/Messages/Message";
 import { getBase64 } from "../../utils";
 import * as UserService from "../../services/UserService";
 import { themeConstant } from "../../page/AdminPage/AdminPage";
@@ -331,7 +330,7 @@ const AdminUser = ({ theme, setTheme }) => {
 
   const columns = [
     {
-      title: "Name",
+      title: "Tên người dùng",
       dataIndex: "name",
       sorter: (a, b) => a.name.length - b.name.length,
       ...getColumnSearchProps("name"),
@@ -348,30 +347,24 @@ const AdminUser = ({ theme, setTheme }) => {
       ...getColumnSearchProps("isAdmin"),
     },
     {
-      title: "Phone",
+      title: "Số điện thoại",
       dataIndex: "phone",
       sorter: (a, b) => a.phone - b.phone,
       ...getColumnSearchProps("phone"),
     },
     {
-      title: "Address",
+      title: "Địa chỉ",
       dataIndex: "address",
       sorter: (a, b) => a.address - b.address,
       ...getColumnSearchProps("address"),
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       sorter: (a, b) => a.role.length - b.role.length,
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      sorter: (a, b) => a.createdAt - b.createdAt,
-      ...getColumnSearchProps("createdAt"),
-    },
-    {
-      title: "Action",
+      title: "Hành động",
       dataIndex: "action",
       render: renderAction,
     },
@@ -411,7 +404,9 @@ const AdminUser = ({ theme, setTheme }) => {
         />
       </div>
       <DrawerComponent
-        title="Chi tiết người dùng"
+        title={
+          <span style={{ paddingBottom: "20px" }}>Chi tiết người dùng</span>
+        } // Thêm padding cho tiêu đề
         isOpen={isOpenDrawer}
         onClose={() => setIsOpenDrawer(false)}
         width="50%"
@@ -420,20 +415,21 @@ const AdminUser = ({ theme, setTheme }) => {
           <Form
             name="basic"
             labelCol={{
-              span: 2,
+              span: 6, // Điều chỉnh labelCol và wrapperCol để căn chỉnh form hợp lý
             }}
             wrapperCol={{
-              span: 22,
+              span: 18,
             }}
             style={{
               maxWidth: 600,
+              paddingTop: "20px", // Thêm khoảng cách phía trên form để không bị dính vào tiêu đề
             }}
             onFinish={onUpdateUser}
             autoComplete="off"
             form={form}
           >
             <Form.Item
-              label="Name"
+              label="Họ và tên"
               name="name"
               rules={[
                 {
@@ -465,8 +461,9 @@ const AdminUser = ({ theme, setTheme }) => {
                 name="email"
               />
             </Form.Item>
+
             <Form.Item
-              label="Phone"
+              label="Số điện thoại"
               name="phone"
               rules={[
                 {
@@ -482,7 +479,7 @@ const AdminUser = ({ theme, setTheme }) => {
             </Form.Item>
 
             <Form.Item
-              label="Address"
+              label="Địa chỉ"
               name="address"
               rules={[
                 {
@@ -496,8 +493,9 @@ const AdminUser = ({ theme, setTheme }) => {
                 name="address"
               />
             </Form.Item>
+
             <Form.Item
-              label="Role"
+              label="Vai trò"
               name="role"
               rules={[
                 {
@@ -511,6 +509,7 @@ const AdminUser = ({ theme, setTheme }) => {
                 name="role"
               />
             </Form.Item>
+
             <Form.Item
               label="IsAdmin"
               name="isAdmin"
@@ -528,7 +527,7 @@ const AdminUser = ({ theme, setTheme }) => {
             </Form.Item>
 
             <Form.Item
-              label="Avatar"
+              label="Ảnh đại diện"
               name="avatar"
               rules={[
                 {
@@ -571,7 +570,7 @@ const AdminUser = ({ theme, setTheme }) => {
               </div>
 
               <Button type="primary" htmlType="submit">
-                Apply
+                Xác nhận
               </Button>
             </Form.Item>
           </Form>

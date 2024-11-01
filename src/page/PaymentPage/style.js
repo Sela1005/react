@@ -57,7 +57,6 @@ export const WrapperInfo = styled.div`
     background: #fff;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;    
-    width: 100%;
 `
 
 export const WrapperTotal = styled.div`
@@ -80,7 +79,7 @@ export const WrapperTotal = styled.div`
     border: 1px solid rgb(194,255,255);
     width: 500px;
     border-radius: 4px;
-    height: 100px;
+    height: 150px;
     padding: 16px;
     font-weight: normal;
     display: flex;

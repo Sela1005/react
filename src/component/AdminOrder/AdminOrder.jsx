@@ -1,30 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
-import { WapperUploadFile, WrapperHeader } from "./style";
-import { Button, Form, Space } from "antd";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusSquareTwoTone,
-  SearchOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import { WrapperHeader } from "./style";
 import TableComponent from "../TableComponent/TableComponent";
-import InputComponent from "../InputConponent/InputConponent";
-import DrawerComponent from "../DrawerComponent/DrawerComponent";
-import Loading from "../LoadingComponent/Loading";
-import ModalComponent from "../ModalComponent/ModalComponent";
 import { useSelector } from "react-redux";
-import { useMutationHooks } from "../../hooks/useMutationHook";
 import { useQuery } from "@tanstack/react-query";
-import * as message from "../Messages/Message";
-import { convertPrice, getBase64 } from "../../utils";
+import {
+  convertPrice,
+  convertStatusOrder,
+  convertPaidOrder,
+  convertPercent,
+  convertDateISO,
+} from "../../utils";
 import * as OrderService from "../../services/OrderServices";
 import { orderContant } from "../../contant";
 import PieChartComponent from "./PieChart";
+import { useMutationHooks } from "../../hooks/useMutationHook";
+import { Dropdown, Menu } from "antd";
 
 const AdminOrder = () => {
   const [rowSelected, setRowSelected] = useState("");
-
+  const [dataTable, setDataTable] = useState([]);
   const user = useSelector((state) => state?.user);
 
   const getAllOrder = async () => {
@@ -44,60 +38,215 @@ const AdminOrder = () => {
     { label: "Phương thức thanh toán", key: "paymentMethod" },
     { label: "Đơn giá", key: "price" },
     { label: "Tổng tiền", key: "totalPrice" },
+    { label: "Tình trạng", key: "orderStatus" },
+    { label: "Thanh toán", key: "isPaid" },
+    { label: "Mã giảm giá áp dụng", key: "discountCode" },
+    { label: "Phần trăm giảm giá", key: "discountPercentage" },
+    { label: "Ngày tạo", key: "createdAt" },
+    { label: "Ngày cập nhật", key: "updatedAt" },
   ];
 
   const columns = [
     {
-      title: "User Name",
+      title: "Tên người mua",
       dataIndex: "userName",
       sorter: (a, b) => a.userName.length - b.userName.length,
     },
     {
-      title: "Phone",
+      title: "Số điện thoại",
       dataIndex: "phone",
       sorter: (a, b) => a.phone.length - b.phone.length,
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      sorter: (a, b) => a.address - b.address,
+      title: "Tình trạng đơn hàng",
+      dataIndex: "orderStatus",
+      sorter: (a, b) => a.orderStatus.length - b.orderStatus.length,
+      render: (text, record) => {
+        const menuItems = [
+          { label: "Đang giao hàng", key: "Shipped" },
+          { label: "Đã giao hàng", key: "Delivered" },
+          { label: "Đang xử lý", key: "Processing" },
+          { label: "Đã hủy", key: "Cancelled" },
+        ];
+
+        const menu = (
+          <Menu onClick={(e) => handleStatusChange(record._id, e.key)}>
+            {menuItems.map((item) => (
+              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+            ))}
+          </Menu>
+        );
+
+        return (
+          <Dropdown onSettled overlay={menu} trigger={["click"]}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <a onClick={(e) => e.preventDefault()}>
+                {text} <span>▼</span>
+              </a>
+            </div>
+          </Dropdown>
+        );
+      },
     },
+
     {
-      title: "City",
-      dataIndex: "city",
-      sorter: (a, b) => a.city - b.city,
-    },
-    {
-      title: "Shipping Price",
-      dataIndex: "shippingPrice",
-      sorter: (a, b) => a.shippingPrice - b.shippingPrice,
-    },
-    {
-      title: "Payment method",
-      dataIndex: "paymentMethod",
-      sorter: (a, b) => a.paymentMethod - b.paymentMethod,
+      title: "Thanh toán",
+      dataIndex: "isPaid",
+      sorter: (a, b) => a.isPaid - b.isPaid,
+      render: (text, record) => {
+        const paidText = record.isPaid ? "Đã thanh toán" : "Chưa thanh toán";
+
+        const menuItems = [
+          { label: "Đã thanh toán", key: "true" },
+          { label: "Chưa thanh toán", key: "false" },
+        ];
+
+        const menu = (
+          <Menu onClick={(e) => handlePaidChange(record._id, e.key)}>
+            {menuItems.map((item) => (
+              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+            ))}
+          </Menu>
+        );
+
+        return (
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <a onClick={(e) => e.preventDefault()}>{paidText}</a>
+            </div>
+          </Dropdown>
+        );
+      },
     },
     {
       title: "Tổng tiền đơn hàng ",
       dataIndex: "totalPrice",
-      sorter: (a, b) => a.totalPrice - b.totalPrice,
+      color: "red",
+      sorter: (a, b) => parseFloat(a.totalPrice) - parseFloat(b.totalPrice),
+    },
+    {
+      title: "Tiền giao hàng",
+      dataIndex: "shippingPrice",
+      sorter: (a, b) =>
+        parseFloat(a.shippingPrice) - parseFloat(b.shippingPrice),
+    },
+
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      sorter: (a, b) => a.address - b.address,
+    },
+    {
+      title: "Thành phố",
+      dataIndex: "city",
+      sorter: (a, b) => a.city - b.city,
+    },
+    {
+      title: "Tỷ lệ giảm giá",
+      dataIndex: "discountPercentage",
+      width: 10,
+      sorter: (a, b) =>
+        parseFloat(a.discountPercentage) - parseFloat(b.discountPercentage),
+    },
+    {
+      title: "Mã giảm giá",
+      dataIndex: "discountCode",
+      width: 50,
+      sorter: (a, b) => a.discountCode - b.discountCode,
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      width: 10,
+      sorter: (a, b) =>
+        parseFloat(a.discountPercentage) - parseFloat(b.discountPercentage),
+    },
+    {
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      width: 50,
+      sorter: (a, b) => a.discountCode - b.discountCode,
+    },
+
+    {
+      title: "Phương thức thanh toán",
+      dataIndex: "paymentMethod",
+      width: 50,
+      sorter: (a, b) => a.paymentMethod - b.paymentMethod,
     },
   ];
-  const dataTable = orders?.data.length
-    ? orders.data.map((order) => {
-        return {
-          ...order,
-          key: order._id,
-          userName: order?.shippingAddress?.fullName,
-          phone: order?.shippingAddress?.phone,
-          address: order?.shippingAddress?.address,
-          city: order?.shippingAddress?.city,
-          paymentMethod: orderContant.payment[order?.paymentMethod],
-          totalPrice: convertPrice(order?.totalPrice),
-          shippingPrice: convertPrice(order?.shippingPrice),
-        };
-      })
-    : [];
+  useEffect(() => {
+    console.log("Orders data: ", orders);
+    if (orders?.data) {
+      const updatedDataTable = orders.data.map((order) => ({
+        ...order,
+        key: order._id,
+        userName: order?.shippingAddress?.fullName,
+        phone: `0${order?.shippingAddress?.phone}`,
+        address: order?.shippingAddress?.address,
+        city: order?.shippingAddress?.city,
+        paymentMethod: orderContant.payment[order?.paymentMethod],
+        totalPrice: convertPrice(order?.totalPrice),
+        shippingPrice: convertPrice(order?.shippingPrice),
+        orderStatus: convertStatusOrder(order?.orderStatus),
+        isPaid: order?.isPaid,
+        discountPercentage: convertPercent(order?.discountPercentage),
+        createdAt: convertDateISO(order?.createdAt),
+        updatedAt: convertDateISO(order?.updatedAt),
+      }));
+      setDataTable(updatedDataTable); // Cập nhật trạng thái dataTable
+    }
+  }, [orders]);
+
+  //updateStatusOrder
+  const mutationUpdate = useMutationHooks((data) => {
+    const { id, token, ...rests } = data;
+    return OrderService.updateOrder(id, token, { ...rests });
+  });
+
+  const handleStatusChange = (orderId, status) => {
+    mutationUpdate.mutate(
+      {
+        id: orderId,
+        token: user?.access_token,
+        orderStatus: status,
+      },
+      {
+        onSuccess: () => {
+          // Cập nhật dataTable sau khi thay đổi trạng thái thành công
+          setDataTable((prevData) =>
+            prevData.map((order) =>
+              order.key === orderId
+                ? { ...order, orderStatus: convertStatusOrder(status) }
+                : order
+            )
+          );
+        },
+      }
+    );
+  };
+
+  const handlePaidChange = (orderId, paid) => {
+    const isPaidValue = paid === "true"; // Convert string to boolean
+    mutationUpdate.mutate(
+      {
+        id: orderId,
+        token: user?.access_token,
+        isPaid: isPaidValue,
+      },
+      {
+        onSuccess: () => {
+          setDataTable((prevData) =>
+            prevData.map((order) =>
+              order.key === orderId
+                ? { ...order, isPaid: isPaidValue } // Update isPaid value
+                : order
+            )
+          );
+        },
+      }
+    );
+  };
   return (
     <div>
       <WrapperHeader> Quản lý đơn hàng </WrapperHeader>

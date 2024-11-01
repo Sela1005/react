@@ -1,4 +1,5 @@
 import { Form, message, Radio } from "antd";
+// import { PayPalButton } from "react-paypal-button-v2";
 import React, { useEffect, useMemo, useState } from "react";
 import ButtonComponent from "../../component/ButtonComponent/ButtonComponent";
 import {
@@ -11,24 +12,29 @@ import {
 } from "./style";
 import { useDispatch, useSelector } from "react-redux";
 import { convertPrice } from "../../utils";
-import ModalComponent from "../../component/ModalComponent/ModalComponent";
-import InputComponent from "../../component/InputConponent/InputConponent";
 import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import Loading from "../../component/LoadingComponent/Loading";
 import * as OrderService from "../../services/OrderServices";
 import { useNavigate } from "react-router-dom";
-import { removeAllOrderProduct } from "../../redux/slices/orderSlide";
+import {
+  removeAllOrderProduct,
+  resetDiscount,
+} from "../../redux/slices/orderSlide";
+import * as DiscountService from "../../services/DiscountServices";
+import * as PaymentServices from "../../services/PaymentServices";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 const PaymentPage = () => {
   const navigate = useNavigate();
-
+  const [DiscountAffterApply, setDiscountAffterApply] = useState("");
+  const [clientId, setClientId] = useState("");
   const order = useSelector((state) => state.order);
   const user = useSelector((state) => state.user);
 
   const [delivery, setDelivery] = useState("fast");
   const [payment, setPayment] = useState("later_money");
-
+  const [sdkReady, setSdkReady] = useState(false);
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false);
 
   const [stateUserDetails, setStateUserDetails] = useState({
@@ -51,15 +57,11 @@ const PaymentPage = () => {
       setStateUserDetails({
         city: user?.city,
         name: user?.name,
-        address: user?.addres,
+        address: user?.address,
         phone: user?.phone,
       });
     }
   }, [isOpenModalUpdateInfo]);
-
-  const handleChangeAddress = () => {
-    setIsOpenModalUpdateInfo(true);
-  };
 
   const priceMemo = useMemo(() => {
     const result = order?.orderItemSelected?.reduce((total, cur) => {
@@ -96,34 +98,80 @@ const PaymentPage = () => {
         const amount = cur.amount || 0; // Đảm bảo số lượng là số
         return total + price * amount;
       }, 0) || 0; // Đảm bảo không bị NaN
+    if (order.discountPercentage) {
+      const PriceDiscount = (result / 100) * order.discountPercentage;
+      return result - PriceDiscount + diliveryPriceMemo;
+    } else {
+      return result + diliveryPriceMemo || 0; // Tính tổng giá thành
+    }
+  }, [order?.orderItemSelected, diliveryPriceMemo, order.discountPercentage]); // Thêm order vào mảng phụ thuộc
 
-    return result + diliveryPriceMemo || 0; // Tính tổng giá thành
-  }, [order?.orderItemSelected, diliveryPriceMemo]); // Thêm order vào mảng phụ thuộc
+  //số tiền giảm được
+  const PriceDiscounted = useMemo(() => {
+    const result =
+      order?.orderItemSelected?.reduce((total, cur) => {
+        const price = cur.price || 0; // Đảm bảo giá là số
+        const amount = cur.amount || 0; // Đảm bảo số lượng là số
+        return total + price * amount;
+      }, 0) || 0; // Đảm bảo không bị NaN
+    if (order.discountPercentage) {
+      const PriceDiscount = (result / 100) * order.discountPercentage;
+      return PriceDiscount;
+    } else {
+      return 0;
+    }
+  }, [priceMemo, diliveryPriceMemo, DiscountAffterApply]);
 
   const handleAddOrder = () => {
-    if (
-      user?.access_token &&
-      order?.orderItemSelected &&
-      user?.name &&
-      user?.address &&
-      user?.phone &&
-      user?.city &&
-      priceMemo &&
-      user?.id
-    ) {
-      mutationAddOrder.mutate({
-        token: user?.access_token,
-        orderItems: order?.orderItemSelected,
-        fullName: user?.name,
-        phone: user?.phone,
-        address: user?.address,
-        city: user?.city,
-        paymentMethod: payment,
-        itemsPrice: priceMemo,
-        shippingPrice: diliveryPriceMemo,
-        totalPrice: totalPriceMemo,
-        user: user?.id,
-      });
+    try {
+      if (!order?.orderItemSelected?.length) {
+        message.warning("Bạn chưa chọn sản phẩm");
+        return;
+      }
+      if (order.discountPercentage) {
+        {
+          mutationAddOrder.mutate({
+            token: user?.access_token,
+            orderItems: order?.orderItemSelected,
+            fullName: user?.name,
+            phone: user?.phone,
+            address: user?.address,
+            city: user?.city,
+            paymentMethod: payment,
+            itemsPrice: priceMemo,
+            shippingPrice: diliveryPriceMemo,
+            discountCode: order.discountCode,
+            discountPercentage: order.discountPercentage,
+            totalPrice: totalPriceMemo,
+            user: user?.id,
+          });
+        }
+      } else if (
+        user?.access_token &&
+        order?.orderItemSelected &&
+        user?.name &&
+        user?.address &&
+        user?.phone &&
+        user?.city &&
+        priceMemo &&
+        user?.id
+      ) {
+        mutationAddOrder.mutate({
+          token: user?.access_token,
+          orderItems: order?.orderItemSelected,
+          fullName: user?.name,
+          phone: user?.phone,
+          address: user?.address,
+          city: user?.city,
+          paymentMethod: payment,
+          itemsPrice: priceMemo,
+          shippingPrice: diliveryPriceMemo,
+          totalPrice: totalPriceMemo,
+          user: user?.id,
+        });
+      }
+    } catch (e) {
+      console.log("err handleAddOrder:", e);
     }
   };
 
@@ -138,6 +186,60 @@ const PaymentPage = () => {
     return res;
   });
 
+  const mutationUseDiscount = useMutationHooks((data) => {
+    const { code, token } = data;
+    const res = DiscountService.useDiscount(code, token);
+    return res;
+  });
+  const handleUseDiscount = () => {
+    mutationUseDiscount.mutate({
+      code: order.discountCode,
+      token: user?.access_token,
+    });
+  };
+  const handleMoMoPayment = async () => {
+    try {
+      const StringTotalPriceMemo = totalPriceMemo.toString();
+      console.log("StringTotalPriceMemo", StringTotalPriceMemo);
+      const paymentData = {
+        amountReq: StringTotalPriceMemo,
+        orderInfoReq: "ThanhToanMOMO",
+      };
+      console.log("paymentData", paymentData);
+      const response = await PaymentServices.payWithMoMo(paymentData);
+      console.log("Response:", response); // Kiểm tra phản hồi từ API
+
+      if ((response.message === "Thành công.")) {
+        window.open(response.shortLink); // Chuyển hướng người dùng đến trang thanh toán MoMo
+      } else {
+        message.error("Không thể chuyển đến trang thanh toán MoMo");
+      }
+
+    } catch (error) {
+      console.error("Error during MoMo payment:", error);
+      message.error("Đã xảy ra lỗi trong quá trình thanh toán MoMo");
+    }
+  };
+
+  const onSuccessPaypal = (details, data) => {
+    mutationAddOrder.mutate({
+      token: user?.access_token,
+      orderItems: order?.orderItemSelected,
+      fullName: user?.name,
+      phone: user?.phone,
+      address: user?.address,
+      city: user?.city,
+      paymentMethod: payment,
+      itemsPrice: priceMemo,
+      shippingPrice: diliveryPriceMemo,
+      discountCode: order.discountCode,
+      discountPercentage: order.discountPercentage,
+      totalPrice: totalPriceMemo,
+      user: user?.id,
+      isPaid: true,
+      paidAt: details.update_time,
+    });
+  };
   const { isPending, data } = mutationUpdate;
   const {
     data: dataAdd,
@@ -145,7 +247,7 @@ const PaymentPage = () => {
     isSuccess,
     isError,
   } = mutationAddOrder;
-
+  console.log("order", order);
   useEffect(() => {
     if (isSuccess && dataAdd?.status === "OK") {
       const arrayOrdered = [];
@@ -153,11 +255,19 @@ const PaymentPage = () => {
         arrayOrdered.push(element.product);
       });
       dispatch(removeAllOrderProduct({ listChecked: arrayOrdered }));
+      if (order.discountCode) {
+        handleUseDiscount();
+        dispatch(resetDiscount());
+      }
       message.success("Đặt hàng thành công");
       navigate("/orderSuccess", {
         state: {
           delivery,
           payment,
+          shippingPrice: diliveryPriceMemo,
+          discountCode: order?.discountCode,
+          PriceDiscounted: PriceDiscounted,
+          discountPercentage: order?.discountPercentage,
           orders: order?.orderItemSelected,
           totalPriceMemo,
         },
@@ -167,46 +277,25 @@ const PaymentPage = () => {
     }
   }, [isSuccess, isError]);
 
-  const handleCancelUpdate = () => {
-    setStateUserDetails({
-      name: "",
-      email: "",
-      phone: "",
-      isAdmin: false,
-    });
-    form.resetFields();
-    setIsOpenModalUpdateInfo(false);
-  };
-
-  const handleUpdateInfoUser = () => {
-    const { name, address, city, phone } = stateUserDetails;
-    if (name && address && city && phone) {
-      mutationUpdate.mutate(
-        { id: user?.id, token: user?.access_token, ...stateUserDetails },
-        {
-          onSuccess: () => {
-            dispatch(updateUser({ name, address, city, phone }));
-            setIsOpenModalUpdateInfo(false);
-          },
-        }
-      );
-    }
-  };
-
-  const handleOnchangeDetails = (e) => {
-    setStateUserDetails({
-      ...stateUserDetails,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const handleDilivery = (e) => {
     setDelivery(e.target.value);
   };
   const handlePayment = (e) => {
     setPayment(e.target.value);
   };
+  const addPaypalScript = async () => {
+    const { data } = await PaymentServices.getConfig();
+    setClientId(data); // Lưu client-id
+    setSdkReady(true); // Đánh dấu SDK đã sẵn sàng
+  };
 
+  useEffect(() => {
+    if (!clientId) {
+      addPaypalScript();
+    } else {
+      setSdkReady(true);
+    }
+  }, [clientId]);
   return (
     <Loading isPending={isLoadingAddOrder}>
       <div style={{ background: "#f5f5fa", width: "100%", height: "100vh" }}>
@@ -240,7 +329,8 @@ const PaymentPage = () => {
                     <Radio value="later_money">
                       Thanh toán bằng tiền mặt khi nhận hàng
                     </Radio>
-                    <Radio value="online">Thanh toán bằng chuyển khoản</Radio>
+                    {/* <Radio value="momo">Thanh toán bằng MOMO</Radio> */}
+                    {/* <Radio value="paypal">Thanh toán bằng PayPal</Radio> */}
                   </WrapperRadio>
                 </div>
               </WrapperInfo>
@@ -252,17 +342,6 @@ const PaymentPage = () => {
                     <span>Địa chỉ: </span>
                     <span style={{ fontWeight: "bold" }}>
                       {user?.address},{user?.city}
-                    </span>
-                    <span
-                      onClick={handleChangeAddress}
-                      style={{
-                        color: "#4588B5",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {" "}
-                      Thay đổi
                     </span>
                   </div>
                 </WrapperInfo>
@@ -295,13 +374,13 @@ const PaymentPage = () => {
                     <span>Giảm giá</span>
                     <span
                       style={{
-                        color: "#000",
+                        color: "red",
                         fontSize: "14px",
                         justifyContent: "space-between",
                         fontWeight: "600",
                       }}
                     >
-                      {/* {`${priceDiscountMemo} %`} */}
+                      {order.discountPercentage} %
                     </span>
                   </div>
                   <div
@@ -320,6 +399,30 @@ const PaymentPage = () => {
                       }}
                     >
                       {convertPrice(diliveryPriceMemo)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: "red",
+                      }}
+                    >
+                      Đã giảm được
+                    </span>
+                    <span
+                      style={{
+                        color: "red",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {convertPrice(PriceDiscounted)}
                     </span>
                   </div>
                 </WrapperInfo>
@@ -341,118 +444,81 @@ const PaymentPage = () => {
                   </span>
                 </WrapperTotal>
               </div>
-              <ButtonComponent
-                onClick={() => handleAddOrder()}
-                size={40}
-                type="primary"
-                style={{
-                  margin: "10px",
-                }}
-                styleButton={{
-                  height: "48px",
-                  width: "220px",
-                  border: "none",
-                  borderRadius: "4px",
-                }}
-                textButton={"Mua Hàng"}
-                styleTextButton={{
-                  fontSize: "15px",
-                  fontWeight: "200",
-                }}
-              ></ButtonComponent>
+              {payment == "paypal" && sdkReady ? (
+                <PayPalScriptProvider options={{ "client-id": clientId }}>
+                  <div style={{ width: "320px" }}>
+                    <PayPalButtons
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          purchase_units: [
+                            {
+                              amount: {
+                                value: (totalPriceMemo / 25000).toString(), // Tỉ giá hối đoái
+                              },
+                            },
+                          ],
+                        });
+                      }}
+                      onApprove={async (data, actions) => {
+                        // Xử lý khi thanh toán thành công
+                        await onSuccessPaypal(data);
+                      }}
+                      onError={() => {
+                        alert("Error");
+                      }}
+                    />
+                  </div>
+                </PayPalScriptProvider>
+              ) : (
+                <>
+                  {payment === "momo" ? (
+                    <ButtonComponent
+                      onClick={handleMoMoPayment} // Gọi hàm handleMoMoPayment
+                      size={40}
+                      type="primary"
+                      disabled={!order.orderItems.length}
+                      style={{
+                        margin: "10px",
+                      }}
+                      styleButton={{
+                        height: "48px",
+                        width: "220px",
+                        border: "none",
+                        borderRadius: "4px",
+                      }}
+                      textButton="Thanh Toán MoMo"
+                      styleTextButton={{
+                        fontSize: "15px",
+                        fontWeight: "200",
+                      }}
+                    />
+                  ) : (
+                    <ButtonComponent
+                      onClick={() => handleAddOrder()}
+                      size={40}
+                      type="primary"
+                      disabled={!order.orderItems.length}
+                      style={{
+                        margin: "10px",
+                      }}
+                      styleButton={{
+                        height: "48px",
+                        width: "220px",
+                        border: "none",
+                        borderRadius: "4px",
+                      }}
+                      textButton="Mua Hàng"
+                      styleTextButton={{
+                        fontSize: "15px",
+                        fontWeight: "200",
+                      }}
+                    />
+                  )}
+                </>
+              )}
             </WrapperRight>
           </div>
         </div>
-        <ModalComponent
-          forceRender
-          title="Cập nhật thông tin giao hàng "
-          open={isOpenModalUpdateInfo}
-          onCancel={handleCancelUpdate}
-          onOk={handleUpdateInfoUser}
-        >
-          <Loading isPending={false}>
-            <Form
-              name="basic"
-              labelCol={{
-                span: 4,
-              }}
-              wrapperCol={{
-                span: 20,
-              }}
-              style={{
-                maxWidth: 600,
-              }}
-              // onFinish={onUpdateUser}
-              autoComplete="off"
-              form={form}
-            >
-              <Form.Item
-                label="Name"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input name user!",
-                  },
-                ]}
-              >
-                <InputComponent
-                  value={stateUserDetails.name}
-                  onChange={handleOnchangeDetails}
-                  name="name"
-                />
-              </Form.Item>
-              <Form.Item
-                label="City"
-                name="city"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input name city!",
-                  },
-                ]}
-              >
-                <InputComponent
-                  value={stateUserDetails.city}
-                  onChange={handleOnchangeDetails}
-                  name="city"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Phone"
-                name="phone"
-                rules={[
-                  {
-                    required: false,
-                  },
-                ]}
-              >
-                <InputComponent
-                  value={stateUserDetails.phone}
-                  onChange={handleOnchangeDetails}
-                  name="phone"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Address"
-                name="address"
-                rules={[
-                  {
-                    required: false,
-                  },
-                ]}
-              >
-                <InputComponent
-                  value={stateUserDetails.address}
-                  onChange={handleOnchangeDetails}
-                  name="address"
-                />
-              </Form.Item>
-            </Form>
-          </Loading>
-        </ModalComponent>
       </div>
     </Loading>
   );

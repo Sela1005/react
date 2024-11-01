@@ -1,5 +1,7 @@
 import {
+  BarChartOutlined,
   BookOutlined,
+  PercentageOutlined,
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -9,7 +11,8 @@ import AdminUser from "../../component/AdminUser/AdminUser";
 import AdminProduct from "../../component/AdminProduct/AdminProduct";
 import AdminOrder from "../../component/AdminOrder/AdminOrder";
 import { useSelector } from "react-redux";
-
+import AdminDiscount from "../../component/AdminDiscount/AdminDiscount";
+import AdminRevenue from "../../component/AdminRevenue/AdminRevenue"
 export const themeConstant = {
   light: {
     background: "#ffffff",
@@ -49,6 +52,10 @@ const AdminPage = () => {
         return <AdminProduct />;
       case "order":
         return <AdminOrder />;
+      case "discount":
+        return <AdminDiscount />;
+      case "revenue":
+        return <AdminRevenue />;
       default:
         return <></>;
     }
@@ -77,21 +84,21 @@ const AdminPage = () => {
         icon: <BookOutlined />,
       });
     }
-    if (user?.role === "Phuc") {
+    if (user?.role === "QuanLy") {
       baseItems.unshift({
         key: "user",
         label: "Người dùng",
         icon: <UserOutlined />,
       });
     }
-    if (user?.role === "Phuc") {
+    if (user?.role === "QuanLy") {
       baseItems.unshift({
         key: "product",
         label: "Sản phẩm",
         icon: <BookOutlined />,
       });
     }
-    if (user?.role === "Phuc") {
+    if (user?.role === "QuanLy") {
       baseItems.unshift({
         key: "order",
         label: "Đơn hàng",
@@ -99,6 +106,20 @@ const AdminPage = () => {
       });
     }
 
+    if (user?.role === "QuanLy") {
+      baseItems.unshift({
+        key: "discount",
+        label: "Mã giảm giá",
+        icon: <PercentageOutlined />,
+      });
+    }
+    if (user?.role === "QuanLy") {
+      baseItems.unshift({
+        key: "revenue",
+        label: "Doanh thu",
+        icon: <BarChartOutlined />,
+      });
+    }
     return baseItems;
   }, [user]);
 
