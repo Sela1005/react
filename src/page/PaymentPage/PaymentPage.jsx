@@ -283,19 +283,6 @@ const PaymentPage = () => {
   const handlePayment = (e) => {
     setPayment(e.target.value);
   };
-  const addPaypalScript = async () => {
-    const { data } = await PaymentServices.getConfig();
-    setClientId(data); // Lưu client-id
-    setSdkReady(true); // Đánh dấu SDK đã sẵn sàng
-  };
-
-  useEffect(() => {
-    if (!clientId) {
-      addPaypalScript();
-    } else {
-      setSdkReady(true);
-    }
-  }, [clientId]);
   return (
     <Loading isPending={isLoadingAddOrder}>
       <div style={{ background: "#f5f5fa", width: "100%", height: "100vh" }}>

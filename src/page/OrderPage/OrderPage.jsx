@@ -589,7 +589,7 @@ const OderPage = () => {
                   <input
                     placeholder="Mã giảm giá"
                     style={{
-                      width: "95.5%",
+                      width: "100%",
                       padding: "10px",
                       borderRadius: "10px",
                     }}
