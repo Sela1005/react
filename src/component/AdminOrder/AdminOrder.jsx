@@ -14,7 +14,7 @@ import * as OrderService from "../../services/OrderServices";
 import { orderContant } from "../../contant";
 import PieChartComponent from "./PieChart";
 import { useMutationHooks } from "../../hooks/useMutationHook";
-import { Dropdown, Menu } from "antd";
+import { Dropdown, Image, Menu, Table } from "antd";
 
 const AdminOrder = () => {
   const [rowSelected, setRowSelected] = useState("");
@@ -57,6 +57,7 @@ const AdminOrder = () => {
       dataIndex: "phone",
       sorter: (a, b) => a.phone.length - b.phone.length,
     },
+    Table.EXPAND_COLUMN,
     {
       title: "Tình trạng đơn hàng",
       dataIndex: "orderStatus",
@@ -260,6 +261,20 @@ const AdminOrder = () => {
           columns={columns}
           isLoading={isLoadingOrders}
           data={dataTable}
+          expandable={{
+            expandedRowRender: (record) => (
+              <div style={{ margin: 0 }}>
+                {record.orderItems.map((item, index) => (
+                  <div key={index} style={{ marginBottom: '8px', padding: '4px', borderBottom: '1px solid #ddd',display: 'flex', gap: '10px' }}>
+                    <Image src={item.image} alt={item.name} style={{ width: '50px', height: '50px', marginLeft: '8px' }} />
+                    <p> {item.name} </p>
+                    <p><strong>x{item.amount} </strong> </p>
+                    <p>Giá: {item.price.toLocaleString()} VND</p>
+                  </div>
+                ))}
+              </div>
+            ),
+          }}
         />
       </div>
     </div>
